@@ -1,4 +1,5 @@
 import { formatPrice } from '../../utils/format';
+import { getProductImageUrl } from '../../utils/productImages';
 import ProductImage from './ProductImage';
 
 export default function SuggestedProducts({ product, products }) {
@@ -15,7 +16,7 @@ export default function SuggestedProducts({ product, products }) {
       <div className="suggested-list">
         {suggested.map((item) => (
           <article className="suggested-item" key={item.id}>
-            <ProductImage size="tiny" src={item.imageUrl} alt={item.name} />
+            <ProductImage size="tiny" src={getProductImageUrl(item)} alt={item.name} />
             <div>
               <strong>{item.name}</strong>
               <span>{formatPrice(item.price)}</span>

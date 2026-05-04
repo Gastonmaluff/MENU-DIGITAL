@@ -1,5 +1,6 @@
 import { Sparkles } from 'lucide-react';
 import { formatPrice } from '../../utils/format';
+import { getProductFeaturedImageUrl, getProductImageUrl } from '../../utils/productImages';
 import ProductImage from './ProductImage';
 
 export default function FeaturedProduct({ product, onOpen }) {
@@ -21,7 +22,7 @@ export default function FeaturedProduct({ product, onOpen }) {
       <div className="featured-visual">
         <ProductImage
           size="featured"
-          src={product.featuredImageUrl || product.imageUrl}
+          src={getProductFeaturedImageUrl(product) || getProductImageUrl(product)}
           alt={product.name}
           loading="eager"
         />

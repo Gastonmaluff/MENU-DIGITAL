@@ -1,4 +1,4 @@
-import { Coffee } from 'lucide-react';
+import { ImagePlus } from 'lucide-react';
 import { resolveAssetUrl } from '../../utils/assets';
 
 export default function ProductImage({ src, alt, size = 'medium', loading = 'lazy' }) {
@@ -10,7 +10,7 @@ export default function ProductImage({ src, alt, size = 'medium', loading = 'laz
         <img className="product-image" src={imageSrc} alt={alt} loading={loading} decoding="async" />
       ) : (
         <div className="product-image-placeholder" aria-label={alt}>
-          <Coffee size={42} strokeWidth={1.4} />
+          <ImagePlus size={38} strokeWidth={1.4} />
         </div>
       )}
     </div>

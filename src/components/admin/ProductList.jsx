@@ -1,5 +1,5 @@
 import { Edit3, Plus, Star, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
 import { useVariantGroups } from '../../hooks/useVariantGroups';
@@ -7,6 +7,7 @@ import { productService } from '../../services/productService';
 import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 import { formatPrice } from '../../utils/format';
 import ImageUploader from './ImageUploader';
+import ProductThumbnail from './ProductThumbnail';
 
 const emptyProduct = {
   name: '',
@@ -87,7 +88,7 @@ export default function ProductList() {
       <section className="admin-card-grid">
         {products.map((product) => (
           <article className="admin-product-card" key={product.id}>
-            {product.imageUrl && <img src={product.imageUrl} alt={product.name} />}
+            <ProductThumbnail product={product} />
             <div>
               <strong>{product.name}</strong>
               <span>{categories.find((category) => category.id === product.categoryId)?.name || 'Sin categoría'}</span>
@@ -106,6 +107,8 @@ export default function ProductList() {
 }
 
 function ProductForm({ product, products, categories, variantGroups, saving, onCancel, onSave }) {
+  const [pendingUploads, setPendingUploads] = useState(0);
+  const [imageUploadError, setImageUploadError] = useState('');
   const [form, setForm] = useState({
     ...product,
     tags: Array.isArray(product.tags) ? product.tags.join(', ') : product.tags || '',
@@ -121,7 +124,17 @@ function ProductForm({ product, products, categories, variantGroups, saving, onC
 
   const submit = (event) => {
     event.preventDefault();
+    if (pendingUploads > 0 || imageUploadError) return;
     onSave(form);
+  };
+
+  const setUploadActive = useCallback((active) => {
+    setPendingUploads((count) => Math.max(0, count + (active ? 1 : -1)));
+  }, []);
+
+  const updateImageField = (field, url) => {
+    setImageUploadError('');
+    setForm({ ...form, [field]: url });
   };
 
   return (
@@ -138,8 +151,21 @@ function ProductForm({ product, products, categories, variantGroups, saving, onC
       <label>Descripción corta<input value={form.shortDescription} onChange={(event) => setForm({ ...form, shortDescription: event.target.value })} /></label>
       <label>Descripción completa<textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
       <label>Tags separados por coma<input value={form.tags} onChange={(event) => setForm({ ...form, tags: event.target.value })} /></label>
-      <ImageUploader label="Imagen principal" value={form.imageUrl} onChange={(url) => setForm({ ...form, imageUrl: url })} />
-      <ImageUploader label="Imagen destacada opcional" value={form.featuredImageUrl} onChange={(url) => setForm({ ...form, featuredImageUrl: url })} />
+      <ImageUploader
+        label="Imagen principal"
+        value={form.imageUrl}
+        onChange={(url) => updateImageField('imageUrl', url)}
+        onUploadingChange={setUploadActive}
+        onError={(error) => setImageUploadError(error.message)}
+      />
+      <ImageUploader
+        label="Imagen destacada opcional"
+        value={form.featuredImageUrl}
+        onChange={(url) => updateImageField('featuredImageUrl', url)}
+        onUploadingChange={setUploadActive}
+        onError={(error) => setImageUploadError(error.message)}
+      />
+      {imageUploadError && <small className="admin-error-text">{imageUploadError}</small>}
       <div className="admin-switch-row">
         <label className="admin-checkbox"><input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} /> Activo</label>
         <label className="admin-checkbox"><input type="checkbox" checked={form.featured} onChange={(event) => setForm({ ...form, featured: event.target.checked })} /> Destacado</label>
@@ -162,7 +188,9 @@ function ProductForm({ product, products, categories, variantGroups, saving, onC
       </fieldset>
       <div className="admin-form-actions">
         <button className="admin-secondary-button" type="button" onClick={onCancel}>Cancelar</button>
-        <button className="admin-primary-button" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar producto'}</button>
+        <button className="admin-primary-button" type="submit" disabled={saving || pendingUploads > 0 || Boolean(imageUploadError)}>
+          {pendingUploads > 0 ? 'Subiendo imagen...' : saving ? 'Guardando...' : 'Guardar producto'}
+        </button>
       </div>
     </form>
   );

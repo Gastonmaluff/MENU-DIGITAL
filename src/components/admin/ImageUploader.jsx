@@ -1,10 +1,18 @@
 import { ImagePlus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStorageUpload } from '../../hooks/useStorageUpload';
 
-export default function ImageUploader({ label, value, onChange, folder = 'products' }) {
+export default function ImageUploader({ label, value, onChange, onUploadingChange, onError, folder = 'products' }) {
   const { upload, uploading, error } = useStorageUpload();
   const [preview, setPreview] = useState(value || '');
+
+  useEffect(() => {
+    setPreview(value || '');
+  }, [value]);
+
+  useEffect(() => {
+    onUploadingChange?.(uploading);
+  }, [uploading, onUploadingChange]);
 
   const handleFile = async (event) => {
     const file = event.target.files?.[0];
@@ -19,6 +27,7 @@ export default function ImageUploader({ label, value, onChange, folder = 'produc
       setPreview(url);
     } catch (uploadError) {
       console.error('No se pudo subir la imagen', uploadError);
+      onError?.(uploadError);
       setPreview(previousPreview);
     }
   };

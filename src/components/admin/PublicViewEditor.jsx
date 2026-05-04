@@ -8,16 +8,16 @@ import {
   Sparkles,
   Trash2,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
 import { categoryService } from '../../services/categoryService';
 import { productService } from '../../services/productService';
-import { resolveAssetUrl } from '../../utils/assets';
 import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 import { formatPrice, slugify } from '../../utils/format';
 import ImageUploader from './ImageUploader';
+import ProductThumbnail from './ProductThumbnail';
 
 const iconOptions = ['Coffee', 'Snowflake', 'Wheat', 'CakeSlice', 'Leaf', 'CupSoda'];
 
@@ -239,7 +239,7 @@ export default function PublicViewEditor() {
               <div className="editor-product-list">
                 {categoryProducts.map((product) => (
                   <article className="editor-product-row" key={product.id}>
-                    <img src={resolveAssetUrl(product.imageUrl || '/assets/cappuccino.png')} alt={product.name} />
+                    <ProductThumbnail product={product} />
                     <div>
                       <strong>{product.name}</strong>
                       <span>{product.shortDescription || 'Sin subtítulo'} · {formatPrice(product.price)}</span>
@@ -305,6 +305,8 @@ function CategoryEditor({ category, saving, onCancel, onSave }) {
 }
 
 function ProductEditor({ product, saving, onCancel, onSave }) {
+  const [pendingUploads, setPendingUploads] = useState(0);
+  const [imageUploadError, setImageUploadError] = useState('');
   const [form, setForm] = useState({
     ...product,
     visualOptions: {
@@ -315,7 +317,17 @@ function ProductEditor({ product, saving, onCancel, onSave }) {
 
   const submit = (event) => {
     event.preventDefault();
+    if (pendingUploads > 0 || imageUploadError) return;
     onSave(form);
+  };
+
+  const setUploadActive = useCallback((active) => {
+    setPendingUploads((count) => Math.max(0, count + (active ? 1 : -1)));
+  }, []);
+
+  const updateImageField = (field, url) => {
+    setImageUploadError('');
+    setForm({ ...form, [field]: url });
   };
 
   const setVisualOption = (key, value) => {
@@ -344,9 +356,22 @@ function ProductEditor({ product, saving, onCancel, onSave }) {
       </div>
       <label>Descripción<textarea value={form.description || ''} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
       <div className="form-grid">
-        <ImageUploader label="Imagen principal PNG/JPG" value={form.imageUrl} onChange={(url) => setForm({ ...form, imageUrl: url })} />
-        <ImageUploader label="Imagen destacada opcional" value={form.featuredImageUrl} onChange={(url) => setForm({ ...form, featuredImageUrl: url })} />
+        <ImageUploader
+          label="Imagen principal PNG/JPG"
+          value={form.imageUrl}
+          onChange={(url) => updateImageField('imageUrl', url)}
+          onUploadingChange={setUploadActive}
+          onError={(error) => setImageUploadError(error.message)}
+        />
+        <ImageUploader
+          label="Imagen destacada opcional"
+          value={form.featuredImageUrl}
+          onChange={(url) => updateImageField('featuredImageUrl', url)}
+          onUploadingChange={setUploadActive}
+          onError={(error) => setImageUploadError(error.message)}
+        />
       </div>
+      {imageUploadError && <small className="admin-error-text">{imageUploadError}</small>}
       <section className="editor-options-box">
         <div>
           <strong>Opciones visuales</strong>
@@ -361,8 +386,8 @@ function ProductEditor({ product, saving, onCancel, onSave }) {
       </div>
       <div className="admin-form-actions">
         <button className="admin-secondary-button" type="button" onClick={onCancel}>Cancelar</button>
-        <button className="admin-primary-button" type="submit" disabled={saving}>
-          <CheckCircle2 size={18} /> {saving ? 'Guardando...' : 'Guardar producto'}
+        <button className="admin-primary-button" type="submit" disabled={saving || pendingUploads > 0 || Boolean(imageUploadError)}>
+          <CheckCircle2 size={18} /> {pendingUploads > 0 ? 'Subiendo imagen...' : saving ? 'Guardando...' : 'Guardar producto'}
         </button>
       </div>
     </form>

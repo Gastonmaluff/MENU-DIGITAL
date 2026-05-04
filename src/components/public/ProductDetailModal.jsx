@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { formatPrice } from '../../utils/format';
+import { getProductFeaturedImageUrl, getProductImageUrl } from '../../utils/productImages';
 import ProductImage from './ProductImage';
 import ProductOptionIcons from './ProductOptionIcons';
 import SuggestedProducts from './SuggestedProducts';
@@ -14,7 +15,7 @@ export default function ProductDetailModal({ product, products, variantGroups, o
           <X size={22} />
         </button>
         <div className="modal-hero">
-          <ProductImage size="large" src={product.featuredImageUrl || product.imageUrl} alt={product.name} loading="eager" />
+          <ProductImage size="large" src={getProductFeaturedImageUrl(product) || getProductImageUrl(product)} alt={product.name} loading="eager" />
           <div>
             <span className="modal-kicker">Detalle del producto</span>
             <h3>{product.name}</h3>
