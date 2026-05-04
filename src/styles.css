@@ -356,7 +356,7 @@ button { cursor: pointer; }
   overflow: hidden;
 }
 .product-image-frame--tiny { width: 74px; height: 74px; }
-.product-image-frame--small { height: 142px; padding: 0 4px 10px; }
+.product-image-frame--small { height: 158px; padding: 0 2px 8px; }
 .product-image-frame--medium { height: 220px; }
 .product-image-frame--large { height: 330px; }
 .product-image-frame--featured { height: 266px; padding: 0 0 14px; }
@@ -374,8 +374,8 @@ button { cursor: pointer; }
   max-height: 106%;
 }
 .product-image-frame--small .product-image {
-  max-width: 82%;
-  max-height: 110%;
+  max-width: 88%;
+  max-height: 116%;
 }
 .product-image-placeholder {
   width: 86px;
@@ -400,10 +400,10 @@ button { cursor: pointer; }
   padding: 10px 13px 12px;
   color: inherit;
   text-align: left;
-  min-height: 300px;
+  min-height: 308px;
   display: grid;
-  grid-template-rows: 142px minmax(78px, 1fr) 34px;
-  gap: 6px;
+  grid-template-rows: 158px minmax(82px, 1fr) 30px;
+  gap: 5px;
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 .product-card:hover,
@@ -412,24 +412,25 @@ button { cursor: pointer; }
   box-shadow: var(--shadow-card);
 }
 .product-card-image-area {
-  height: 142px;
+  height: 158px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: visible;
 }
 .product-card-content {
-  min-height: 78px;
+  min-height: 82px;
   display: grid;
-  grid-template-rows: minmax(0, auto) 24px;
-  gap: 4px;
+  grid-template-rows: minmax(0, auto) auto;
+  gap: 6px;
 }
 .product-card-copy {
   min-width: 0;
 }
 .product-card h3 {
-  font-size: 1.22rem;
-  margin: 0 0 3px;
+  color: var(--text-primary);
+  font-size: 1.12rem;
+  margin: 0 0 2px;
   line-height: 1.05;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -438,9 +439,9 @@ button { cursor: pointer; }
 }
 .product-card p {
   margin: 0;
-  color: var(--text-secondary);
+  color: color-mix(in srgb, var(--text-secondary) 76%, var(--card));
   line-height: 1.22;
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
@@ -457,22 +458,33 @@ button { cursor: pointer; }
 .product-option-icons {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 23px;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-height: 24px;
 }
 .product-option-icons span {
-  width: 23px;
-  height: 23px;
+  width: fit-content;
+  min-height: 23px;
   border: 1px solid var(--border);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 7px;
+  color: color-mix(in srgb, var(--accent) 84%, var(--text-secondary));
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.product-option-icons b {
+  font: inherit;
+  white-space: nowrap;
 }
 .product-option-icons--modal span {
-  width: 36px;
-  height: 36px;
+  min-height: 34px;
+  padding: 7px 11px;
+  font-size: 0.82rem;
 }
 .tag-row span,
 .variant-preview span,
@@ -487,14 +499,14 @@ button { cursor: pointer; }
 .product-card-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  min-height: 34px;
+  justify-content: flex-start;
+  min-height: 30px;
 }
 .product-card-footer strong {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.18rem;
+  color: color-mix(in srgb, var(--text-secondary) 78%, var(--text-primary));
+  font-size: 1.1rem;
 }
-.round-action,
 .see-more-action,
 .see-more-icon {
   width: 34px;
@@ -1124,10 +1136,10 @@ textarea {
   .product-grid { grid-template-columns: 1fr; }
   .product-image-frame--featured { height: 260px; }
   .product-card-image-area,
-  .product-image-frame--small { height: 150px; }
+  .product-image-frame--small { height: 170px; }
   .product-card {
-    min-height: 318px;
-    grid-template-rows: 150px minmax(78px, 1fr) 34px;
+    min-height: 330px;
+    grid-template-rows: 170px minmax(82px, 1fr) 30px;
   }
   .admin-page-header { align-items: flex-start; flex-direction: column; }
 }

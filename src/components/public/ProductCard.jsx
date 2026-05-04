@@ -1,4 +1,3 @@
-import { Plus } from 'lucide-react';
 import { formatPrice } from '../../utils/format';
 import ProductImage from './ProductImage';
 import ProductOptionIcons from './ProductOptionIcons';
@@ -18,9 +17,6 @@ export default function ProductCard({ product, variantGroups, onOpen }) {
       </div>
       <div className="product-card-footer">
         <strong>{formatPrice(product.price)}</strong>
-        <span className="round-action">
-          <Plus size={18} />
-        </span>
       </div>
     </button>
   );

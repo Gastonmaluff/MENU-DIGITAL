@@ -23,6 +23,6 @@ export const getProductVisualOptions = (product, variantGroups = []) => {
 };
 
 export const visualOptionList = [
-  { key: 'lactoseFree', label: 'Deslactosado', Icon: MilkOff },
-  { key: 'plantBased', label: 'Vegetal', Icon: Leaf },
+  { key: 'lactoseFree', label: 'Sin lactosa', Icon: MilkOff },
+  { key: 'plantBased', label: 'Leche vegetal', Icon: Leaf },
 ];
