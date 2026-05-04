@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#F7F1EA" />
+    <title>Nirvana Café Gourmet | Menú Digital</title>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get('redirect');
+      if (redirect) {
+        const basePath = window.location.pathname.replace(/\/$/, '');
+        const cleanPath = `${basePath}${redirect.startsWith('/') ? redirect : `/${redirect}`}`;
+        window.history.replaceState(null, '', cleanPath);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

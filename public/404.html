@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <script>
+      const repo = '/MENU-DIGITAL';
+      const path = window.location.pathname;
+      const redirectPath = path.startsWith(repo) ? path.slice(repo.length) : path;
+      window.location.replace(`${repo}/?redirect=${encodeURIComponent(redirectPath + window.location.search + window.location.hash)}`);
+    </script>
+  </head>
+  <body></body>
+</html>
