@@ -11,16 +11,18 @@ import ProductGrid from './ProductGrid';
 import ThemeWrapper from './ThemeWrapper';
 
 export default function PublicMenu() {
-  const { settings, usingDemo: settingsDemo } = useSettings();
-  const { items: categories, loading: loadingCategories } = useCategories();
-  const { items: products, loading: loadingProducts, usingDemo: productsDemo } = useProducts();
-  const { items: variantGroups } = useVariantGroups();
+  const { settings, syncing: syncingSettings, usingDemo: settingsDemo, error: settingsError } = useSettings();
+  const { items: categories, syncing: syncingCategories, error: categoriesError } = useCategories();
+  const { items: products, syncing: syncingProducts, usingDemo: productsDemo, error: productsError } = useProducts();
+  const { items: variantGroups, syncing: syncingVariants } = useVariantGroups();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [visibleCount, setVisibleCount] = useState(5);
 
   const activeCategories = useMemo(() => categories.filter((category) => category.active), [categories]);
-  const currentCategoryId = activeCategoryId || activeCategories[0]?.id;
+  const currentCategoryId = activeCategories.some((category) => category.id === activeCategoryId)
+    ? activeCategoryId
+    : activeCategories[0]?.id;
   const activeProducts = useMemo(() => products.filter((product) => product.active), [products]);
   const categoryProducts = useMemo(
     () => activeProducts.filter((product) => product.categoryId === currentCategoryId),
@@ -28,7 +30,8 @@ export default function PublicMenu() {
   );
   const featuredProduct = categoryProducts.find((product) => product.featured) || categoryProducts[0];
   const gridProducts = categoryProducts.filter((product) => product.id !== featuredProduct?.id);
-  const loading = loadingCategories || loadingProducts;
+  const syncing = syncingSettings || syncingCategories || syncingProducts || syncingVariants;
+  const firebaseError = settingsError || categoriesError || productsError;
 
   const selectCategory = (categoryId) => {
     setActiveCategoryId(categoryId);
@@ -47,21 +50,23 @@ export default function PublicMenu() {
         {(productsDemo || settingsDemo) && (
           <div className="demo-note">Vista demo activa hasta que cargues datos en Firebase.</div>
         )}
-        {loading ? (
-          <div className="loading-card">Cargando menú...</div>
-        ) : (
-          <>
-            <FeaturedProduct product={featuredProduct} onOpen={setSelectedProduct} />
-            <ProductGrid
-              products={gridProducts}
-              variantGroups={variantGroups}
-              visibleCount={visibleCount}
-              onOpen={setSelectedProduct}
-              onShowMore={() => setVisibleCount((count) => count + 6)}
-              hasMore={gridProducts.length > visibleCount}
-            />
-          </>
+        {syncing && (
+          <div className="sync-status" aria-live="polite">
+            <span /> Actualizando menú...
+          </div>
         )}
+        {firebaseError && !syncing && (
+          <div className="sync-status sync-status--soft">Menú local activo. Firebase no respondió todavía.</div>
+        )}
+        <FeaturedProduct product={featuredProduct} onOpen={setSelectedProduct} />
+        <ProductGrid
+          products={gridProducts}
+          variantGroups={variantGroups}
+          visibleCount={visibleCount}
+          onOpen={setSelectedProduct}
+          onShowMore={() => setVisibleCount((count) => count + 6)}
+          hasMore={gridProducts.length > visibleCount}
+        />
         {settings.showFooter && <footer className="menu-footer">{settings.footerText}</footer>}
         <ProductDetailModal
           product={selectedProduct}

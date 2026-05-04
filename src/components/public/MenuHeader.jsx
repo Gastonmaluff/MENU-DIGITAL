@@ -1,10 +1,13 @@
 import { Bean } from 'lucide-react';
+import { resolveAssetUrl } from '../../utils/assets';
 
 export default function MenuHeader({ settings }) {
+  const logoUrl = resolveAssetUrl(settings.logoUrl);
+
   return (
     <header className="menu-header">
-      {settings.logoUrl ? (
-        <img className="brand-logo" src={settings.logoUrl} alt={`${settings.brandName} ${settings.brandSubtitle}`} />
+      {logoUrl ? (
+        <img className="brand-logo" src={logoUrl} alt={`${settings.brandName} ${settings.brandSubtitle}`} loading="eager" decoding="async" />
       ) : (
         <>
           <h1>{settings.brandName}</h1>

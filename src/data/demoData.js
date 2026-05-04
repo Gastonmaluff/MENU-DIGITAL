@@ -45,7 +45,7 @@ export const demoVariantGroups = [
   },
 ];
 
-const cup = '/assets/cappuccino.png';
+const cup = `${import.meta.env.BASE_URL}assets/cappuccino.png`;
 
 export const demoProducts = [
   {
@@ -327,7 +327,7 @@ export const demoProducts = [
   },
 ];
 
-export const defaultSettings = {
+export const demoSettings = {
   brandName: 'Nirvana',
   brandSubtitle: 'Café Gourmet',
   menuTitle: 'Menú',
@@ -338,7 +338,9 @@ export const defaultSettings = {
   primaryColor: '#B87934',
   backgroundColor: '#F7F1EA',
   darkBackgroundColor: '#0D0D0F',
-  logoUrl: '/assets/nirvana-logo.png',
+  logoUrl: `${import.meta.env.BASE_URL}assets/nirvana-logo.png`,
   productShadowIntensity: 'medium',
   borderRadius: 'large',
 };
+
+export const defaultSettings = demoSettings;

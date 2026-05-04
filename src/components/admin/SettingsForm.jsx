@@ -5,7 +5,7 @@ import { settingsService } from '../../services/settingsService';
 import ImageUploader from './ImageUploader';
 
 export default function SettingsForm() {
-  const { settings, loading, error, usingDemo, reload } = useSettings();
+  const { settings, syncing, error, usingDemo, reload } = useSettings();
   const [form, setForm] = useState(settings);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -35,10 +35,10 @@ export default function SettingsForm() {
         <div><span>General</span><h1>Configuración</h1></div>
       </div>
       {usingDemo && <div className="admin-warning">Al guardar se creará el documento `settings/main`.</div>}
+      {syncing && <div className="admin-inline-sync"><span /> Sincronizando configuración...</div>}
       {error && <div className="admin-error">{error}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}
-      {loading ? 'Cargando...' : (
-        <form className="admin-panel admin-form" onSubmit={save}>
+      <form className="admin-panel admin-form" onSubmit={save}>
           <div className="form-grid">
             <label>Marca<input value={form.brandName} onChange={(event) => setForm({ ...form, brandName: event.target.value })} /></label>
             <label>Subtítulo<input value={form.brandSubtitle} onChange={(event) => setForm({ ...form, brandSubtitle: event.target.value })} /></label>
@@ -55,8 +55,7 @@ export default function SettingsForm() {
           <button className="admin-primary-button" type="submit" disabled={saving}>
             <Save size={18} /> {saving ? 'Guardando...' : 'Guardar configuración'}
           </button>
-        </form>
-      )}
+      </form>
     </div>
   );
 }

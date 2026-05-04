@@ -14,7 +14,7 @@ const emptyGroup = {
 };
 
 export default function VariantGroupList() {
-  const { items, loading, error, usingDemo, reload } = useVariantGroups();
+  const { items, syncing, error, usingDemo, reload } = useVariantGroups();
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -50,11 +50,12 @@ export default function VariantGroupList() {
         </button>
       </div>
       {usingDemo && <div className="admin-warning">Estás viendo variantes demo. Creá un grupo para guardar en Firestore.</div>}
+      {syncing && <div className="admin-inline-sync"><span /> Sincronizando variantes...</div>}
       {error && <div className="admin-error">{error}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}
       {editing && <VariantGroupForm group={editing} saving={saving} onCancel={() => setEditing(null)} onSave={save} />}
       <section className="admin-list">
-        {loading ? 'Cargando...' : items.map((group) => (
+        {items.map((group) => (
           <article className="admin-list-item" key={group.id}>
             <div>
               <strong>{group.name}</strong>

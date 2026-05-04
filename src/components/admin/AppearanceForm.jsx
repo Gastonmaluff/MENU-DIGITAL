@@ -6,7 +6,7 @@ import AdminPreview from './AdminPreview';
 import ImageUploader from './ImageUploader';
 
 export default function AppearanceForm() {
-  const { settings, loading, error, usingDemo, reload } = useSettings();
+  const { settings, syncing, error, usingDemo, reload } = useSettings();
   const [form, setForm] = useState(settings);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -36,10 +36,10 @@ export default function AppearanceForm() {
         <div><span>Diseño</span><h1>Apariencia</h1></div>
       </div>
       {usingDemo && <div className="admin-warning">La configuración aún no existe en Firestore. Al guardar se creará `settings/main`.</div>}
+      {syncing && <div className="admin-inline-sync"><span /> Sincronizando apariencia...</div>}
       {error && <div className="admin-error">{error}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}
-      {loading ? 'Cargando...' : (
-        <div className="admin-two-column">
+      <div className="admin-two-column">
           <form className="admin-panel admin-form" onSubmit={save}>
             <div className="form-grid">
               <label>Modo
@@ -84,8 +84,7 @@ export default function AppearanceForm() {
             <h2>Preview rápida</h2>
             <AdminPreview settings={form} />
           </section>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -24,7 +24,7 @@ const emptyProduct = {
 };
 
 export default function ProductList() {
-  const { items: products, loading, error, usingDemo, reload } = useProducts();
+  const { items: products, syncing, error, usingDemo, reload } = useProducts();
   const { items: categories } = useCategories();
   const { items: variantGroups } = useVariantGroups();
   const [editing, setEditing] = useState(null);
@@ -62,6 +62,7 @@ export default function ProductList() {
         </button>
       </div>
       {usingDemo && <div className="admin-warning">Estás viendo productos demo. Al guardar un producto nuevo se cargará en Firestore.</div>}
+      {syncing && <div className="admin-inline-sync"><span /> Sincronizando productos...</div>}
       {error && <div className="admin-error">{error}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}
       {editing && (
@@ -76,7 +77,7 @@ export default function ProductList() {
         />
       )}
       <section className="admin-card-grid">
-        {loading ? 'Cargando...' : products.map((product) => (
+        {products.map((product) => (
           <article className="admin-product-card" key={product.id}>
             {product.imageUrl && <img src={product.imageUrl} alt={product.name} />}
             <div>

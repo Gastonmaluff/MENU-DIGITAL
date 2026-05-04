@@ -14,7 +14,7 @@ export default function ProductDetailModal({ product, products, variantGroups, o
           <X size={22} />
         </button>
         <div className="modal-hero">
-          <ProductImage size="large" src={product.featuredImageUrl || product.imageUrl} alt={product.name} />
+          <ProductImage size="large" src={product.featuredImageUrl || product.imageUrl} alt={product.name} loading="eager" />
           <div>
             <span className="modal-kicker">Detalle del producto</span>
             <h3>{product.name}</h3>

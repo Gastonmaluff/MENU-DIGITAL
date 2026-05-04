@@ -156,6 +156,37 @@ button { cursor: pointer; }
   background: color-mix(in srgb, var(--card) 86%, transparent);
   color: var(--text-secondary);
 }
+.sync-status,
+.admin-inline-sync {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 9px 13px;
+  margin: 8px 0 10px;
+  background: color-mix(in srgb, var(--card) 82%, transparent);
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+.sync-status span,
+.admin-inline-sync span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 32%, transparent);
+  animation: sync-pulse 1.2s ease-in-out infinite;
+}
+.sync-status--soft {
+  color: var(--text-secondary);
+}
+@keyframes sync-pulse {
+  70% { box-shadow: 0 0 0 8px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
 .featured-product {
   width: 100%;
   border: 1px solid var(--border);
@@ -734,6 +765,14 @@ textarea {
 }
 .admin-error-text {
   color: #9a2e1b;
+}
+.admin-inline-sync {
+  border-color: rgba(90, 60, 40, 0.1);
+  background: #fffdfc;
+  color: #7a6658;
+}
+.admin-inline-sync span {
+  background: #b87934;
 }
 
 @media (max-width: 760px) {

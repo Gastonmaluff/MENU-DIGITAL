@@ -22,6 +22,7 @@ export default function FeaturedProduct({ product, onOpen }) {
         size="featured"
         src={product.featuredImageUrl || product.imageUrl}
         alt={product.name}
+        loading="eager"
       />
     </button>
   );
