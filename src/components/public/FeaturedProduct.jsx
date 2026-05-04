@@ -18,12 +18,14 @@ export default function FeaturedProduct({ product, onOpen }) {
         <strong>{formatPrice(product.price)}</strong>
         <p>{product.description}</p>
       </div>
-      <ProductImage
-        size="featured"
-        src={product.featuredImageUrl || product.imageUrl}
-        alt={product.name}
-        loading="eager"
-      />
+      <div className="featured-visual">
+        <ProductImage
+          size="featured"
+          src={product.featuredImageUrl || product.imageUrl}
+          alt={product.name}
+          loading="eager"
+        />
+      </div>
     </button>
   );
 }

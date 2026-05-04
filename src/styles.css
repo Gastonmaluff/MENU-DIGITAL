@@ -292,8 +292,8 @@ button { cursor: pointer; }
   border-radius: var(--radius-card);
   background: var(--featured-card);
   box-shadow: var(--shadow-card);
-  padding: 24px 28px 22px;
-  min-height: 242px;
+  padding: 22px 28px 20px;
+  min-height: 232px;
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
   align-items: center;
@@ -318,6 +318,7 @@ button { cursor: pointer; }
 .featured-copy {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 .featured-product h3 {
   margin: 0;
@@ -339,28 +340,34 @@ button { cursor: pointer; }
   line-height: 1.38;
   font-size: 0.9rem;
 }
+.featured-visual {
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
 .product-image-frame {
   width: 100%;
-  display: grid;
-  place-items: center;
-  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 .product-image-frame--tiny { width: 74px; height: 74px; }
-.product-image-frame--small { height: 128px; padding: 4px 10px 12px; }
+.product-image-frame--small { height: 112px; padding: 0 10px 14px; }
 .product-image-frame--medium { height: 220px; }
 .product-image-frame--large { height: 330px; }
-.product-image-frame--featured { height: 250px; padding: 0 0 18px; }
+.product-image-frame--featured { height: 222px; padding: 0 4px 18px; }
 .product-image {
-  width: 100%;
-  height: 100%;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
   filter: var(--product-shadow);
-}
-.featured-product .product-image {
-  transform: translateY(-8px) scale(1.02);
-}
-.product-card .product-image {
-  transform: translateY(-9px);
 }
 .product-image-placeholder {
   width: 86px;
@@ -382,12 +389,13 @@ button { cursor: pointer; }
   border-radius: calc(var(--radius-card) - 8px);
   background: var(--card);
   box-shadow: 0 12px 34px rgba(79, 52, 31, 0.055);
-  padding: 13px 14px 14px;
+  padding: 12px 14px 13px;
   color: inherit;
   text-align: left;
-  min-height: 214px;
-  display: flex;
-  flex-direction: column;
+  min-height: 224px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 7px;
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 .product-card:hover,
@@ -395,17 +403,30 @@ button { cursor: pointer; }
   transform: translateY(-3px);
   box-shadow: var(--shadow-card);
 }
-.product-card-body {
+.product-card-image-area {
+  height: 112px;
   display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 7px;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.product-card-content {
+  min-height: 58px;
+  display: grid;
+  grid-template-rows: minmax(0, auto) 25px;
+  gap: 5px;
+}
+.product-card-copy {
+  min-width: 0;
 }
 .product-card h3 {
   font-size: 1.28rem;
   margin: 0 0 4px;
   line-height: 1.05;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .product-card p {
   margin: 0;
@@ -459,6 +480,7 @@ button { cursor: pointer; }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 34px;
 }
 .product-card-footer strong {
   font-family: 'Playfair Display', Georgia, serif;
@@ -476,6 +498,8 @@ button { cursor: pointer; }
   color: #fff8ef;
 }
 .see-more-card {
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 14px;
@@ -1068,6 +1092,7 @@ textarea {
   }
   .featured-product { text-align: center; }
   .featured-copy { justify-items: center; }
+  .featured-visual { min-height: 230px; }
   .product-grid { grid-template-columns: repeat(2, 1fr); }
   .admin-sidebar { position: static; }
   .form-grid,
@@ -1090,6 +1115,7 @@ textarea {
 @media (max-width: 520px) {
   .product-grid { grid-template-columns: 1fr; }
   .product-image-frame--featured { height: 260px; }
-  .product-image-frame--small { height: 160px; }
+  .product-card-image-area,
+  .product-image-frame--small { height: 120px; }
   .admin-page-header { align-items: flex-start; flex-direction: column; }
 }
