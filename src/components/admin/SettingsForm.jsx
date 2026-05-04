@@ -38,23 +38,42 @@ export default function SettingsForm() {
       {syncing && <div className="admin-inline-sync"><span /> Sincronizando configuración...</div>}
       {error && <div className="admin-error">{error}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}
-      <form className="admin-panel admin-form" onSubmit={save}>
+      <form className="admin-panel admin-form settings-simple" onSubmit={save}>
+        <section className="settings-section">
+          <div>
+            <strong>Logo del negocio</strong>
+            <span>Usá PNG transparente para que se integre mejor al menú.</span>
+          </div>
+          <ImageUploader label="Subir o reemplazar logo" value={form.logoUrl} onChange={(url) => setForm({ ...form, logoUrl: url })} folder="settings" />
+        </section>
+
+        <section className="settings-section">
+          <div>
+            <strong>Modo visual</strong>
+            <span>Este cambio se aplica a la vista pública.</span>
+          </div>
+          <div className="theme-toggle-admin">
+            <button type="button" className={form.themeMode === 'light' ? 'is-active' : ''} onClick={() => setForm({ ...form, themeMode: 'light' })}>Claro</button>
+            <button type="button" className={form.themeMode === 'dark' ? 'is-active' : ''} onClick={() => setForm({ ...form, themeMode: 'dark' })}>Oscuro</button>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <div>
+            <strong>Textos principales</strong>
+            <span>Solo lo esencial para mantener la composición limpia.</span>
+          </div>
           <div className="form-grid">
             <label>Marca<input value={form.brandName} onChange={(event) => setForm({ ...form, brandName: event.target.value })} /></label>
             <label>Subtítulo<input value={form.brandSubtitle} onChange={(event) => setForm({ ...form, brandSubtitle: event.target.value })} /></label>
             <label>Título del menú<input value={form.menuTitle} onChange={(event) => setForm({ ...form, menuTitle: event.target.value })} /></label>
             <label>Subtítulo del menú<input value={form.menuSubtitle} onChange={(event) => setForm({ ...form, menuSubtitle: event.target.value })} /></label>
           </div>
-          <ImageUploader label="Logo" value={form.logoUrl} onChange={(url) => setForm({ ...form, logoUrl: url })} folder="settings" />
-          <div className="form-grid">
-            <label>Fondo claro<input type="color" value={form.backgroundColor} onChange={(event) => setForm({ ...form, backgroundColor: event.target.value })} /></label>
-            <label>Fondo oscuro<input type="color" value={form.darkBackgroundColor} onChange={(event) => setForm({ ...form, darkBackgroundColor: event.target.value })} /></label>
-          </div>
-          <label className="admin-checkbox"><input type="checkbox" checked={form.showFooter} onChange={(event) => setForm({ ...form, showFooter: event.target.checked })} /> Mostrar footer</label>
-          <label>Texto footer<textarea value={form.footerText} onChange={(event) => setForm({ ...form, footerText: event.target.value })} /></label>
-          <button className="admin-primary-button" type="submit" disabled={saving}>
-            <Save size={18} /> {saving ? 'Guardando...' : 'Guardar configuración'}
-          </button>
+        </section>
+
+        <button className="admin-primary-button" type="submit" disabled={saving}>
+          <Save size={18} /> {saving ? 'Guardando...' : 'Guardar configuración'}
+        </button>
       </form>
     </div>
   );

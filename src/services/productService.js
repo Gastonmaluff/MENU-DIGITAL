@@ -17,6 +17,10 @@ export const normalizeProductPayload = (payload) => ({
   suggestedProductIds: cleanArray(payload.suggestedProductIds),
   active: payload.active ?? true,
   featured: payload.featured ?? false,
+  visualOptions: {
+    lactoseFree: Boolean(payload.visualOptions?.lactoseFree),
+    plantBased: Boolean(payload.visualOptions?.plantBased),
+  },
 });
 
 export const productService = {

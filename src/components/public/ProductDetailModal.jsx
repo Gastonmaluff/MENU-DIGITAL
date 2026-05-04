@@ -1,11 +1,11 @@
 import { X } from 'lucide-react';
 import { formatPrice } from '../../utils/format';
 import ProductImage from './ProductImage';
+import ProductOptionIcons from './ProductOptionIcons';
 import SuggestedProducts from './SuggestedProducts';
 
 export default function ProductDetailModal({ product, products, variantGroups, onClose }) {
   if (!product) return null;
-  const groups = variantGroups.filter((group) => product.variantGroupIds?.includes(group.id) && group.active);
 
   return (
     <div className="modal-backdrop" role="presentation" onClick={onClose}>
@@ -20,38 +20,9 @@ export default function ProductDetailModal({ product, products, variantGroups, o
             <h3>{product.name}</h3>
             <strong>{formatPrice(product.price)}</strong>
             <p>{product.description || product.shortDescription}</p>
-            {product.tags?.length > 0 && (
-              <div className="tag-row">
-                {product.tags.map((tag) => (
-                  <span key={tag}>{tag}</span>
-                ))}
-              </div>
-            )}
+            <ProductOptionIcons product={product} variantGroups={variantGroups} size="modal" />
           </div>
         </div>
-        {groups.length > 0 && (
-          <section className="variant-groups">
-            <h4>Variantes disponibles</h4>
-            {groups.map((group) => (
-              <div className="variant-group" key={group.id}>
-                <div>
-                  <strong>{group.name}</strong>
-                  <span>{group.required ? 'Obligatoria' : 'Opcional'} · {group.type === 'multiple' ? 'Múltiple' : 'Única'}</span>
-                </div>
-                <div className="variant-options">
-                  {(group.options || [])
-                    .filter((option) => option.active)
-                    .map((option) => (
-                      <span key={option.id}>
-                        {option.name}
-                        {Number(option.priceModifier) > 0 ? ` +${formatPrice(option.priceModifier)}` : ''}
-                      </span>
-                    ))}
-                </div>
-              </div>
-            ))}
-          </section>
-        )}
         <SuggestedProducts product={product} products={products} />
       </article>
     </div>

@@ -8,6 +8,7 @@ import AppearanceForm from './components/admin/AppearanceForm';
 import CategoryList from './components/admin/CategoryList';
 import ProductList from './components/admin/ProductList';
 import ProtectedRoute from './components/admin/ProtectedRoute';
+import PublicViewEditor from './components/admin/PublicViewEditor';
 import SettingsForm from './components/admin/SettingsForm';
 import VariantGroupList from './components/admin/VariantGroupList';
 import PublicMenu from './components/public/PublicMenu';
@@ -32,10 +33,11 @@ function App() {
             }
           >
             <Route index element={<AdminDashboard />} />
+            <Route path="menu" element={<PublicViewEditor />} />
             <Route path="categories" element={<CategoryList />} />
             <Route path="products" element={<ProductList />} />
             <Route path="variants" element={<VariantGroupList />} />
-            <Route path="appearance" element={<AppearanceForm />} />
+            <Route path="appearance" element={<Navigate to="/admin/settings" replace />} />
             <Route path="settings" element={<SettingsForm />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

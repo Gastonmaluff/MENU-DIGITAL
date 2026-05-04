@@ -1,22 +1,16 @@
 import {
-  Brush,
-  Coffee,
-  Grid3X3,
   Home,
-  Layers3,
   LogOut,
   Settings,
   SlidersHorizontal,
+  SquarePen,
 } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 const links = [
   { to: '/admin', label: 'Dashboard', icon: Home, end: true },
-  { to: '/admin/categories', label: 'Categorías', icon: Grid3X3 },
-  { to: '/admin/products', label: 'Productos', icon: Coffee },
-  { to: '/admin/variants', label: 'Variantes', icon: Layers3 },
-  { to: '/admin/appearance', label: 'Apariencia', icon: Brush },
+  { to: '/admin/menu', label: 'Editar vista pública', icon: SquarePen },
   { to: '/admin/settings', label: 'Configuración', icon: SlidersHorizontal },
 ];
 
