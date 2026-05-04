@@ -1,10 +1,13 @@
 import {
   Home,
   LogOut,
+  Menu,
   Settings,
   SlidersHorizontal,
   SquarePen,
+  X,
 } from 'lucide-react';
+import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -17,6 +20,7 @@ const links = [
 export default function AdminLayout() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [navOpen, setNavOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -24,18 +28,38 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="admin-shell">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          <Settings size={24} />
+    <div className={`admin-shell ${navOpen ? 'is-nav-open' : ''}`}>
+      <header className="admin-topbar">
+        <button className="admin-menu-button" type="button" onClick={() => setNavOpen(true)} aria-label="Abrir navegación">
+          <Menu size={21} />
+        </button>
+        <div className="admin-brand admin-brand--top">
+          <Settings size={22} />
           <div>
             <strong>Nirvana Admin</strong>
             <span>Menú digital</span>
           </div>
         </div>
+      </header>
+
+      <button className="admin-nav-backdrop" type="button" aria-label="Cerrar navegación" onClick={() => setNavOpen(false)} />
+
+      <aside className="admin-sidebar">
+        <div className="admin-sidebar-head">
+          <div className="admin-brand">
+            <Settings size={24} />
+            <div>
+              <strong>Nirvana Admin</strong>
+              <span>Menú digital</span>
+            </div>
+          </div>
+          <button className="admin-close-button" type="button" onClick={() => setNavOpen(false)} aria-label="Cerrar navegación">
+            <X size={20} />
+          </button>
+        </div>
         <nav>
           {links.map(({ to, label, icon: Icon, end }) => (
-            <NavLink key={to} to={to} end={end}>
+            <NavLink key={to} to={to} end={end} onClick={() => setNavOpen(false)}>
               <Icon size={18} />
               {label}
             </NavLink>
