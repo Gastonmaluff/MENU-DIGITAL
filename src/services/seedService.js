@@ -1,6 +1,7 @@
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../firebase';
 import { defaultSettings, demoCategories, demoProducts, demoVariantGroups } from '../data/demoData';
+import { requireAuthenticatedUser } from './firestoreService';
 
 const upsert = (collectionName, id, payload) =>
   setDoc(
@@ -17,6 +18,7 @@ export const seedDemoData = async () => {
   if (!isFirebaseConfigured || !db) {
     throw new Error('Firebase no está configurado.');
   }
+  requireAuthenticatedUser();
 
   await Promise.all([
     ...demoCategories.map((category) => upsert('categories', category.id, category)),

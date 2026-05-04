@@ -4,6 +4,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
 import { useVariantGroups } from '../../hooks/useVariantGroups';
 import { productService } from '../../services/productService';
+import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 import { formatPrice } from '../../utils/format';
 import ImageUploader from './ImageUploader';
 
@@ -41,7 +42,8 @@ export default function ProductList() {
       setFeedback('Producto guardado.');
       await reload();
     } catch (err) {
-      setFeedback(err.message);
+      console.error('Error guardando producto', err);
+      setFeedback(formatFirebaseWriteError(err));
     } finally {
       setSaving(false);
     }
@@ -49,8 +51,14 @@ export default function ProductList() {
 
   const remove = async (product) => {
     if (!confirm(`Eliminar producto "${product.name}"?`)) return;
-    await productService.remove(product.id);
-    reload();
+    try {
+      await productService.remove(product.id);
+      setFeedback('Producto eliminado.');
+      reload();
+    } catch (err) {
+      console.error('Error eliminando producto', err);
+      setFeedback(formatFirebaseWriteError(err));
+    }
   };
 
   return (

@@ -53,6 +53,21 @@ Colecciones usadas:
 
 Si Firestore está vacío, la vista pública muestra datos demo locales. Desde `/admin` podés usar el botón **Cargar demo** para sembrar categorías, productos, variantes y settings reales en Firestore.
 
+### Reglas de Firestore y Storage
+
+El repo incluye reglas listas en:
+
+- `firestore.rules`
+- `storage.rules`
+
+La vista publica puede leer `categories`, `products`, `variantGroups`, `settings/main` e imagenes. Solo usuarios autenticados en Firebase Auth pueden crear, editar, eliminar o subir archivos.
+
+Para aplicarlas desde la CLI de Firebase:
+
+```bash
+firebase deploy --only firestore:rules,storage
+```
+
 ## Cargar productos
 
 En `/admin/products` podés crear, editar, eliminar, activar/desactivar, destacar, cambiar orden, asociar categoría, variantes y productos sugeridos.

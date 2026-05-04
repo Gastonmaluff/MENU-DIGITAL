@@ -2,6 +2,7 @@ import { Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSettings } from '../../hooks/useSettings';
 import { settingsService } from '../../services/settingsService';
+import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 import AdminPreview from './AdminPreview';
 import ImageUploader from './ImageUploader';
 
@@ -24,7 +25,8 @@ export default function AppearanceForm() {
       setFeedback('Apariencia guardada.');
       await reload();
     } catch (err) {
-      setFeedback(err.message);
+      console.error('Error guardando apariencia', err);
+      setFeedback(formatFirebaseWriteError(err));
     } finally {
       setSaving(false);
     }

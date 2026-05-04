@@ -760,6 +760,28 @@ button { cursor: pointer; }
 .admin-ghost-button {
   margin-top: auto;
 }
+.admin-session-card {
+  border: 1px solid rgba(90, 60, 40, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 253, 252, 0.7);
+  padding: 12px 14px;
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.admin-session-card span {
+  color: #7a6658;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.admin-session-card strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.86rem;
+}
 .admin-content {
   padding: 26px;
   overflow: auto;

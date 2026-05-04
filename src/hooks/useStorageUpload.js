@@ -12,6 +12,7 @@ export const useStorageUpload = () => {
     try {
       return await uploadImage(file, folder);
     } catch (err) {
+      console.error('Image upload failed', err);
       setError(err.message);
       throw err;
     } finally {

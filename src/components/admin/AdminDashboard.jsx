@@ -5,6 +5,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
 import { useSettings } from '../../hooks/useSettings';
 import { seedDemoData } from '../../services/seedService';
+import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 
 export default function AdminDashboard() {
   const { items: categories } = useCategories();
@@ -21,7 +22,8 @@ export default function AdminDashboard() {
       await seedDemoData();
       setFeedback('Datos demo cargados en Firestore. Recargá las secciones para editarlos.');
     } catch (err) {
-      setFeedback(err.message);
+      console.error('Error cargando demo en Firestore', err);
+      setFeedback(formatFirebaseWriteError(err));
     } finally {
       setSeeding(false);
     }

@@ -10,10 +10,17 @@ export default function ImageUploader({ label, value, onChange, folder = 'produc
     const file = event.target.files?.[0];
     if (!file) return;
     const localPreview = URL.createObjectURL(file);
+    const previousPreview = preview;
     setPreview(localPreview);
-    const url = await upload(file, folder);
-    onChange(url);
-    setPreview(url);
+
+    try {
+      const url = await upload(file, folder);
+      onChange(url);
+      setPreview(url);
+    } catch (uploadError) {
+      console.error('No se pudo subir la imagen', uploadError);
+      setPreview(previousPreview);
+    }
   };
 
   return (

@@ -2,6 +2,7 @@ import { Edit3, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useCategories } from '../../hooks/useCategories';
 import { categoryService } from '../../services/categoryService';
+import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 import { slugify } from '../../utils/format';
 
 const emptyCategory = { name: '', icon: 'Coffee', sortOrder: 1, active: true };
@@ -22,7 +23,8 @@ export default function CategoryList() {
       setFeedback('Categoría guardada.');
       await reload();
     } catch (err) {
-      setFeedback(err.message);
+      console.error('Error guardando categoría', err);
+      setFeedback(formatFirebaseWriteError(err));
     } finally {
       setSaving(false);
     }
@@ -30,8 +32,14 @@ export default function CategoryList() {
 
   const remove = async (category) => {
     if (!confirm(`Eliminar categoría "${category.name}"?`)) return;
-    await categoryService.remove(category.id);
-    reload();
+    try {
+      await categoryService.remove(category.id);
+      setFeedback('Categoría eliminada.');
+      reload();
+    } catch (err) {
+      console.error('Error eliminando categoría', err);
+      setFeedback(formatFirebaseWriteError(err));
+    }
   };
 
   return (

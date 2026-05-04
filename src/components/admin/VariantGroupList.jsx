@@ -2,6 +2,7 @@ import { Edit3, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useVariantGroups } from '../../hooks/useVariantGroups';
 import { variantService } from '../../services/variantService';
+import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 import { formatPrice } from '../../utils/format';
 
 const emptyGroup = {
@@ -29,7 +30,8 @@ export default function VariantGroupList() {
       setFeedback('Grupo de variantes guardado.');
       await reload();
     } catch (err) {
-      setFeedback(err.message);
+      console.error('Error guardando variantes', err);
+      setFeedback(formatFirebaseWriteError(err));
     } finally {
       setSaving(false);
     }
@@ -37,8 +39,14 @@ export default function VariantGroupList() {
 
   const remove = async (group) => {
     if (!confirm(`Eliminar grupo "${group.name}"?`)) return;
-    await variantService.remove(group.id);
-    reload();
+    try {
+      await variantService.remove(group.id);
+      setFeedback('Grupo eliminado.');
+      reload();
+    } catch (err) {
+      console.error('Error eliminando variantes', err);
+      setFeedback(formatFirebaseWriteError(err));
+    }
   };
 
   return (

@@ -18,7 +18,7 @@ const links = [
 ];
 
 export default function AdminLayout() {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [navOpen, setNavOpen] = useState(false);
 
@@ -69,6 +69,10 @@ export default function AdminLayout() {
           <LogOut size={18} />
           Salir
         </button>
+        <div className="admin-session-card">
+          <span>Sesión activa</span>
+          <strong>{user?.email || 'Usuario admin'}</strong>
+        </div>
       </aside>
       <section className="admin-content">
         <Outlet />

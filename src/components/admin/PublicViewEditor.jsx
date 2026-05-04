@@ -9,11 +9,13 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
 import { categoryService } from '../../services/categoryService';
 import { productService } from '../../services/productService';
 import { resolveAssetUrl } from '../../utils/assets';
+import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 import { formatPrice, slugify } from '../../utils/format';
 import ImageUploader from './ImageUploader';
 
@@ -48,6 +50,7 @@ const emptyProduct = {
 };
 
 export default function PublicViewEditor() {
+  const { user } = useAuth();
   const { items: categories, syncing: syncingCategories, error: categoriesError, usingDemo: demoCategories, reload: reloadCategories } = useCategories();
   const { items: products, syncing: syncingProducts, error: productsError, usingDemo: demoProducts, reload: reloadProducts } = useProducts();
   const [activeCategoryId, setActiveCategoryId] = useState('');
@@ -63,6 +66,10 @@ export default function PublicViewEditor() {
   );
 
   const saveCategory = async (payload) => {
+    if (!user) {
+      setFeedback('No tenés permisos para guardar. Iniciá sesión como administrador.');
+      return;
+    }
     setSaving(true);
     setFeedback('');
     try {
@@ -77,13 +84,18 @@ export default function PublicViewEditor() {
       setFeedback('Categoría guardada.');
       await reloadCategories();
     } catch (err) {
-      setFeedback(err.message);
+      console.error('Error guardando categoría', err);
+      setFeedback(formatFirebaseWriteError(err));
     } finally {
       setSaving(false);
     }
   };
 
   const saveProduct = async (payload) => {
+    if (!user) {
+      setFeedback('No tenés permisos para guardar. Iniciá sesión como administrador.');
+      return;
+    }
     setSaving(true);
     setFeedback('');
     try {
@@ -100,7 +112,8 @@ export default function PublicViewEditor() {
       setFeedback('Producto guardado. La vista pública se actualizará automáticamente.');
       await reloadProducts();
     } catch (err) {
-      setFeedback(err.message);
+      console.error('Error guardando producto', err);
+      setFeedback(formatFirebaseWriteError(err));
     } finally {
       setSaving(false);
     }
@@ -108,14 +121,28 @@ export default function PublicViewEditor() {
 
   const removeCategory = async (category) => {
     if (!confirm(`Eliminar categoría "${category.name}"?`)) return;
-    await categoryService.remove(category.id);
-    await reloadCategories();
+    setFeedback('');
+    try {
+      await categoryService.remove(category.id);
+      setFeedback('Categoría eliminada.');
+      await reloadCategories();
+    } catch (err) {
+      console.error('Error eliminando categoría', err);
+      setFeedback(formatFirebaseWriteError(err));
+    }
   };
 
   const removeProduct = async (product) => {
     if (!confirm(`Eliminar producto "${product.name}"?`)) return;
-    await productService.remove(product.id);
-    await reloadProducts();
+    setFeedback('');
+    try {
+      await productService.remove(product.id);
+      setFeedback('Producto eliminado.');
+      await reloadProducts();
+    } catch (err) {
+      console.error('Error eliminando producto', err);
+      setFeedback(formatFirebaseWriteError(err));
+    }
   };
 
   return (
@@ -140,6 +167,7 @@ export default function PublicViewEditor() {
       {(syncingCategories || syncingProducts) && <div className="admin-inline-sync"><span /> Sincronizando contenido...</div>}
       {(categoriesError || productsError) && <div className="admin-error">{categoriesError || productsError}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}
+      {!user && <div className="admin-error">No hay una sesión admin activa. Volvé a iniciar sesión para guardar cambios.</div>}
 
       <div className="editor-layout">
         <aside className="editor-categories admin-panel">
