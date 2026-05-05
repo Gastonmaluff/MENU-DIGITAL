@@ -1,4 +1,3 @@
-import { Bean } from 'lucide-react';
 import { resolveAssetUrl } from '../../utils/assets';
 
 export default function MenuHeader({ settings }) {
@@ -14,15 +13,6 @@ export default function MenuHeader({ settings }) {
           <p>{settings.brandSubtitle}</p>
         </>
       )}
-      <div className="menu-title-block">
-        <h2>{settings.menuTitle}</h2>
-        <span>{settings.menuSubtitle}</span>
-      </div>
-      <div className="ornament" aria-hidden="true">
-        <span />
-        <Bean size={32} strokeWidth={1.3} />
-        <span />
-      </div>
     </header>
   );
 }

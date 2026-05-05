@@ -21,11 +21,12 @@ export default function PublicMenu() {
   const { items: variantGroups, syncing: syncingVariants } = useVariantGroups();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [visibleCount, setVisibleCount] = useState(getInitialVisibleCount);
+  const [collapsedVisibleCount, setCollapsedVisibleCount] = useState(getInitialVisibleCount);
+  const [expandedCategories, setExpandedCategories] = useState({});
 
   useEffect(() => {
     const media = window.matchMedia(tabletMenuQuery);
-    const syncVisibleCount = () => setVisibleCount((count) => (count <= 5 ? getInitialVisibleCount() : count));
+    const syncVisibleCount = () => setCollapsedVisibleCount(getInitialVisibleCount());
     syncVisibleCount();
     media.addEventListener('change', syncVisibleCount);
     return () => media.removeEventListener('change', syncVisibleCount);
@@ -42,12 +43,23 @@ export default function PublicMenu() {
   );
   const featuredProduct = categoryProducts.find((product) => product.featured) || categoryProducts[0];
   const gridProducts = categoryProducts.filter((product) => product.id !== featuredProduct?.id);
+  const isExpanded = Boolean(expandedCategories[currentCategoryId]);
+  const visibleCount = isExpanded ? gridProducts.length : collapsedVisibleCount;
+  const hasMore = !isExpanded && gridProducts.length > visibleCount;
   const syncing = syncingSettings || syncingCategories || syncingProducts || syncingVariants;
   const firebaseError = settingsError || categoriesError || productsError;
 
   const selectCategory = (categoryId) => {
+    setSelectedProduct(null);
     setActiveCategoryId(categoryId);
-    setVisibleCount(getInitialVisibleCount());
+  };
+
+  const showMoreForCategory = () => {
+    if (!currentCategoryId) return;
+    setExpandedCategories((current) => ({
+      ...current,
+      [currentCategoryId]: true,
+    }));
   };
 
   return (
@@ -76,8 +88,8 @@ export default function PublicMenu() {
           variantGroups={variantGroups}
           visibleCount={visibleCount}
           onOpen={setSelectedProduct}
-          onShowMore={() => setVisibleCount((count) => count + 6)}
-          hasMore={gridProducts.length > visibleCount}
+          onShowMore={showMoreForCategory}
+          hasMore={hasMore}
         />
         {settings.showFooter && <footer className="menu-footer">{settings.footerText}</footer>}
         <ProductDetailModal
