@@ -7,7 +7,13 @@ export default function ProductImage({ src, alt, size = 'medium', loading = 'laz
   return (
     <div className={`product-image-frame product-image-frame--${size}`}>
       {imageSrc ? (
-        <img className="product-image" src={imageSrc} alt={alt} loading={loading} decoding="async" />
+        <img
+          className={`product-image product-image--${size}`}
+          src={imageSrc}
+          alt={alt}
+          loading={loading}
+          decoding="async"
+        />
       ) : (
         <div className="product-image-placeholder" aria-label={alt}>
           <ImagePlus size={38} strokeWidth={1.4} />
