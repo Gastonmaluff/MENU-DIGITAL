@@ -9,10 +9,11 @@ export default function CategoryPills({ categories, activeCategoryId, onSelect }
           className={`category-pill ${category.id === activeCategoryId ? 'is-active' : ''}`}
           type="button"
           key={category.id}
+          aria-label={category.name}
           onClick={() => onSelect(category.id)}
         >
           <AnimatedCategoryIcon name={category.icon} active={category.id === activeCategoryId} />
-          <span>{category.name}</span>
+          <span className="category-label">{category.name}</span>
         </button>
       ))}
     </nav>

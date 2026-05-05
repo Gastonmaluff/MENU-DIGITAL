@@ -166,11 +166,11 @@ button { cursor: pointer; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 11px;
+  gap: 12px;
   overflow-x: auto;
   overflow-y: visible;
-  padding: 4px 3px 9px;
-  margin: 0 0 6px;
+  padding: 6px 3px 14px;
+  margin: 0 0 8px;
   position: relative;
   z-index: 30;
   isolation: isolate;
@@ -179,32 +179,34 @@ button { cursor: pointer; }
 .category-pill {
   position: relative;
   z-index: 31;
-  flex: 1 0 auto;
-  min-width: 126px;
+  flex: 0 1 126px;
+  width: clamp(104px, 14.4vw, 126px);
+  min-width: 104px;
+  min-height: 98px;
   border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border));
-  border-radius: var(--radius-pill);
+  border-radius: 23px;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--card) 98%, white), color-mix(in srgb, var(--surface) 88%, white));
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 98%, white), color-mix(in srgb, var(--surface) 90%, white));
   color: color-mix(in srgb, var(--text-primary) 86%, var(--accent));
-  padding: 10px 18px;
+  padding: 14px 10px 12px;
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  min-height: 46px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 8px 18px rgba(79, 52, 31, 0.045);
+  gap: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 10px 24px rgba(79, 52, 31, 0.06);
   transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 .category-pill:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--accent) 20%, var(--border));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 10px 22px rgba(79, 52, 31, 0.07);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 14px 28px rgba(79, 52, 31, 0.09);
 }
 .category-pill:active {
-  transform: translateY(0) scale(0.985);
+  transform: translateY(0) scale(0.982);
 }
 .category-pill:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--accent) 28%, transparent);
@@ -214,7 +216,7 @@ button { cursor: pointer; }
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 94%, #e5ba77), var(--accent-dark));
   color: #fff8ef;
   border-color: transparent;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 12px 28px color-mix(in srgb, var(--accent) 27%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -10px 18px rgba(95, 51, 15, 0.12), 0 17px 34px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 [data-theme='dark'] .category-pill {
   background:
@@ -229,49 +231,164 @@ button { cursor: pointer; }
   border-color: transparent;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 14px 30px rgba(184, 121, 52, 0.28);
 }
-.category-pill span,
+.category-label,
 .category-pill svg,
 .category-icon-shell {
   pointer-events: none;
 }
+.category-label {
+  display: block;
+  color: currentColor;
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.05;
+  text-align: center;
+  white-space: nowrap;
+}
 .category-icon-shell {
   position: relative;
-  width: 23px;
-  height: 23px;
+  width: 42px;
+  height: 42px;
   display: inline-grid;
   place-items: center;
   flex: 0 0 auto;
-}
-.coffee-steam {
-  position: absolute;
-  inset: -11px 0 auto;
-  height: 14px;
-  display: none;
-  justify-content: center;
-  gap: 2px;
+  color: currentColor;
   pointer-events: none;
 }
-.coffee-steam i {
-  width: 1.5px;
-  height: 10px;
+.category-main-icon {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+.coffee-steam,
+.savory-steam,
+.iced-motion,
+.sweet-sparkles,
+.leaf-drift {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.coffee-steam,
+.savory-steam {
+  inset: -9px 0 auto;
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+.coffee-steam i,
+.savory-steam i {
+  width: 2px;
+  height: 13px;
   border-radius: 999px;
   background: currentColor;
   opacity: 0;
   transform: translateY(5px);
 }
-.category-icon-shell.is-active[data-animation='steam'] .coffee-steam {
-  display: flex;
+.category-icon-shell.is-active[data-animation='coffee'] .coffee-steam i,
+.category-pill:hover .category-icon-shell[data-animation='coffee'] .coffee-steam i,
+.category-icon-shell.is-active[data-animation='savory'] .savory-steam i,
+.category-pill:hover .category-icon-shell[data-animation='savory'] .savory-steam i {
+  animation: steam-rise 3s ease-in-out infinite;
 }
-.category-icon-shell.is-active[data-animation='steam'] .coffee-steam i {
-  animation: coffee-steam-rise 2.8s ease-in-out infinite;
-}
-.category-icon-shell.is-active[data-animation='steam'] .coffee-steam i:nth-child(2) {
+.category-icon-shell.is-active[data-animation='coffee'] .coffee-steam i:nth-child(2),
+.category-pill:hover .category-icon-shell[data-animation='coffee'] .coffee-steam i:nth-child(2),
+.category-icon-shell.is-active[data-animation='savory'] .savory-steam i:nth-child(2),
+.category-pill:hover .category-icon-shell[data-animation='savory'] .savory-steam i:nth-child(2) {
   animation-delay: 0.45s;
 }
-.category-icon-shell.is-active[data-animation='steam'] .coffee-steam i:nth-child(3) {
+.category-icon-shell.is-active[data-animation='coffee'] .coffee-steam i:nth-child(3),
+.category-pill:hover .category-icon-shell[data-animation='coffee'] .coffee-steam i:nth-child(3) {
   animation-delay: 0.9s;
 }
-@keyframes coffee-steam-rise {
+.iced-motion i,
+.iced-motion b {
+  position: absolute;
+  z-index: 3;
+  width: 6px;
+  height: 6px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+  opacity: 0.42;
+}
+.iced-motion i:nth-child(1) {
+  left: 14px;
+  top: 12px;
+}
+.iced-motion i:nth-child(2) {
+  right: 13px;
+  top: 17px;
+}
+.iced-motion b {
+  left: 20px;
+  bottom: 7px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+.category-icon-shell.is-active[data-animation='iced'] .iced-motion i,
+.category-pill:hover .category-icon-shell[data-animation='iced'] .iced-motion i,
+.category-icon-shell.is-active[data-animation='iced'] .iced-motion b,
+.category-pill:hover .category-icon-shell[data-animation='iced'] .iced-motion b {
+  animation: ice-float 3.2s ease-in-out infinite;
+}
+.category-icon-shell.is-active[data-animation='iced'] .iced-motion i:nth-child(2),
+.category-pill:hover .category-icon-shell[data-animation='iced'] .iced-motion i:nth-child(2) {
+  animation-delay: 0.55s;
+}
+.sweet-sparkles i {
+  position: absolute;
+  z-index: 3;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.24;
+}
+.sweet-sparkles i:nth-child(1) {
+  left: 7px;
+  top: 8px;
+}
+.sweet-sparkles i:nth-child(2) {
+  right: 8px;
+  top: 11px;
+}
+.sweet-sparkles i:nth-child(3) {
+  right: 11px;
+  bottom: 7px;
+}
+.category-icon-shell.is-active[data-animation='sweet'] .sweet-sparkles i,
+.category-pill:hover .category-icon-shell[data-animation='sweet'] .sweet-sparkles i {
+  animation: sweet-shimmer 2.7s ease-in-out infinite;
+}
+.category-icon-shell.is-active[data-animation='sweet'] .sweet-sparkles i:nth-child(2),
+.category-pill:hover .category-icon-shell[data-animation='sweet'] .sweet-sparkles i:nth-child(2) {
+  animation-delay: 0.42s;
+}
+.category-icon-shell.is-active[data-animation='sweet'] .sweet-sparkles i:nth-child(3),
+.category-pill:hover .category-icon-shell[data-animation='sweet'] .sweet-sparkles i:nth-child(3) {
+  animation-delay: 0.84s;
+}
+.leaf-drift i {
+  position: absolute;
+  z-index: 1;
+  left: 6px;
+  top: 8px;
+  width: 12px;
+  height: 7px;
+  border: 1.5px solid currentColor;
+  border-left: 0;
+  border-bottom: 0;
+  border-radius: 999px 0 999px 0;
+  opacity: 0.28;
+  transform: rotate(-26deg);
+}
+.category-icon-shell.is-active[data-animation='leaf'] .leaf-drift i,
+.category-pill:hover .category-icon-shell[data-animation='leaf'] .leaf-drift i {
+  animation: leaf-drift 3.4s ease-in-out infinite;
+}
+@keyframes steam-rise {
   0%, 100% {
     opacity: 0;
     transform: translateY(5px) scaleY(0.75);
@@ -282,6 +399,28 @@ button { cursor: pointer; }
   68% {
     opacity: 0;
     transform: translateY(-4px) scaleY(1);
+  }
+}
+@keyframes ice-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.34; }
+  50% { transform: translateY(-3px) rotate(7deg); opacity: 0.62; }
+}
+@keyframes sweet-shimmer {
+  0%, 100% { transform: scale(0.75); opacity: 0.18; }
+  45% { transform: scale(1.25); opacity: 0.72; }
+}
+@keyframes leaf-drift {
+  0%, 100% { transform: translateX(0) translateY(0) rotate(-26deg); opacity: 0.22; }
+  50% { transform: translateX(5px) translateY(-3px) rotate(-12deg); opacity: 0.55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .coffee-steam i,
+  .savory-steam i,
+  .iced-motion i,
+  .iced-motion b,
+  .sweet-sparkles i,
+  .leaf-drift i {
+    animation: none !important;
   }
 }
 .demo-note,
@@ -1346,7 +1485,7 @@ textarea {
     height: 100svh;
     min-height: 0;
     overflow: hidden;
-    padding: 8px 28px 10px;
+    padding: 6px 28px 8px;
   }
   .menu-header {
     gap: 0;
@@ -1354,21 +1493,35 @@ textarea {
   }
   .brand-logo {
     width: min(300px, 56vw);
-    height: 58px;
+    height: 50px;
   }
   .category-pills {
     gap: 8px;
-    padding: 3px 3px 7px;
-    margin-bottom: 5px;
+    padding: 3px 2px 8px;
+    margin-bottom: 3px;
   }
   .category-pill {
-    min-width: 116px;
-    min-height: 42px;
-    padding: 8px 14px;
+    width: calc((100% - 32px) / 5);
+    min-width: 0;
+    min-height: 90px;
+    padding: 10px 8px 9px;
+    border-radius: 22px;
+    gap: 7px;
+  }
+  .category-icon-shell {
+    width: 38px;
+    height: 38px;
+  }
+  .category-main-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .category-label {
+    font-size: 0.78rem;
   }
   .featured-product {
-    min-height: 292px;
-    padding: 13px 24px;
+    min-height: 260px;
+    padding: 11px 24px;
     margin: 0 0 2px;
     grid-template-columns: 0.66fr 1.34fr;
     gap: 8px;
@@ -1391,12 +1544,12 @@ textarea {
     font-size: 0.8rem;
   }
   .product-image-frame--featured {
-    height: 314px;
+    height: 294px;
   }
   .product-grid {
-    padding-top: 46px;
-    gap: 50px 12px;
-    max-height: 306px;
+    padding-top: 43px;
+    gap: 48px 12px;
+    max-height: 294px;
     overflow: visible;
   }
   .product-card,
@@ -1442,6 +1595,28 @@ textarea {
 }
 
 @media (max-width: 520px) {
+  .category-pills {
+    justify-content: flex-start;
+    gap: 9px;
+    padding-bottom: 11px;
+  }
+  .category-pill {
+    width: 96px;
+    min-width: 96px;
+    min-height: 86px;
+    padding: 10px 8px;
+  }
+  .category-icon-shell {
+    width: 36px;
+    height: 36px;
+  }
+  .category-main-icon {
+    width: 30px;
+    height: 30px;
+  }
+  .category-label {
+    font-size: 0.76rem;
+  }
   .product-grid { grid-template-columns: 1fr; }
   .product-image-frame--featured { height: 260px; }
   .product-card-image-area,
