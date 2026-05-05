@@ -15,9 +15,9 @@ const getInitialVisibleCount = () =>
   typeof window !== 'undefined' && window.matchMedia(tabletMenuQuery).matches ? 2 : 5;
 
 export default function PublicMenu() {
-  const { settings, syncing: syncingSettings, usingDemo: settingsDemo, error: settingsError } = useSettings();
+  const { settings, syncing: syncingSettings, error: settingsError } = useSettings();
   const { items: categories, syncing: syncingCategories, error: categoriesError } = useCategories();
-  const { items: products, syncing: syncingProducts, usingDemo: productsDemo, error: productsError } = useProducts();
+  const { items: products, syncing: syncingProducts, error: productsError } = useProducts();
   const { items: variantGroups, syncing: syncingVariants } = useVariantGroups();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -71,9 +71,6 @@ export default function PublicMenu() {
           activeCategoryId={currentCategoryId}
           onSelect={selectCategory}
         />
-        {(productsDemo || settingsDemo) && (
-          <div className="demo-note">Vista demo activa hasta que cargues datos en Firebase.</div>
-        )}
         {syncing && (
           <div className="sync-status" aria-live="polite">
             <span /> Actualizando menú...
