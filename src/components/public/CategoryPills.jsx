@@ -1,6 +1,6 @@
 import { AnimatedCategoryIcon } from './icons';
 
-export default function CategoryPills({ categories, activeCategoryId, onSelect }) {
+export default function CategoryPills({ categories, activeCategoryId, onSelect, disabled = false }) {
   return (
     <nav className="category-pills" aria-label="Categorías del menú">
       {categories.map((category) => (
@@ -10,6 +10,7 @@ export default function CategoryPills({ categories, activeCategoryId, onSelect }
           type="button"
           key={category.id}
           aria-label={category.name}
+          disabled={disabled}
           onClick={() => onSelect(category.id)}
         >
           <AnimatedCategoryIcon name={category.icon} active={category.id === activeCategoryId} />

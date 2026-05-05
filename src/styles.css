@@ -208,6 +208,10 @@ button { cursor: pointer; }
 .category-pill:active {
   transform: translateY(0) scale(0.982);
 }
+.category-pill:disabled {
+  cursor: default;
+  opacity: 1;
+}
 .category-pill:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--accent) 28%, transparent);
   outline-offset: 3px;
@@ -419,7 +423,8 @@ button { cursor: pointer; }
   .iced-motion i,
   .iced-motion b,
   .sweet-sparkles i,
-  .leaf-drift i {
+  .leaf-drift i,
+  .category-content-panel {
     animation: none !important;
   }
 }
@@ -484,6 +489,75 @@ button { cursor: pointer; }
 @keyframes sync-pulse {
   70% { box-shadow: 0 0 0 8px transparent; }
   100% { box-shadow: 0 0 0 0 transparent; }
+}
+.category-content-stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  overflow: visible;
+  isolation: isolate;
+}
+.category-content-stage.is-transitioning {
+  overflow: hidden;
+  pointer-events: none;
+}
+.category-content-panel {
+  grid-area: 1 / 1;
+  min-width: 0;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+.category-content-panel.is-exiting.is-forward {
+  animation: category-exit-left 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.category-content-panel.is-entering.is-forward {
+  animation: category-enter-right 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.category-content-panel.is-exiting.is-backward {
+  animation: category-exit-right 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.category-content-panel.is-entering.is-backward {
+  animation: category-enter-left 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes category-exit-left {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0.36;
+    transform: translateX(-34px);
+  }
+}
+@keyframes category-enter-right {
+  from {
+    opacity: 0.28;
+    transform: translateX(42px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes category-exit-right {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0.36;
+    transform: translateX(34px);
+  }
+}
+@keyframes category-enter-left {
+  from {
+    opacity: 0.28;
+    transform: translateX(-42px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 .featured-product {
   position: relative;
