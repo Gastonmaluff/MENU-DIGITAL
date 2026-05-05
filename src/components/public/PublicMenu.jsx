@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
 import { useSettings } from '../../hooks/useSettings';
@@ -10,6 +10,10 @@ import ProductDetailModal from './ProductDetailModal';
 import ProductGrid from './ProductGrid';
 import ThemeWrapper from './ThemeWrapper';
 
+const tabletMenuQuery = '(min-width: 700px) and (max-width: 900px) and (orientation: portrait)';
+const getInitialVisibleCount = () =>
+  typeof window !== 'undefined' && window.matchMedia(tabletMenuQuery).matches ? 2 : 5;
+
 export default function PublicMenu() {
   const { settings, syncing: syncingSettings, usingDemo: settingsDemo, error: settingsError } = useSettings();
   const { items: categories, syncing: syncingCategories, error: categoriesError } = useCategories();
@@ -17,7 +21,15 @@ export default function PublicMenu() {
   const { items: variantGroups, syncing: syncingVariants } = useVariantGroups();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [visibleCount, setVisibleCount] = useState(5);
+  const [visibleCount, setVisibleCount] = useState(getInitialVisibleCount);
+
+  useEffect(() => {
+    const media = window.matchMedia(tabletMenuQuery);
+    const syncVisibleCount = () => setVisibleCount((count) => (count <= 5 ? getInitialVisibleCount() : count));
+    syncVisibleCount();
+    media.addEventListener('change', syncVisibleCount);
+    return () => media.removeEventListener('change', syncVisibleCount);
+  }, []);
 
   const activeCategories = useMemo(() => categories.filter((category) => category.active), [categories]);
   const currentCategoryId = activeCategories.some((category) => category.id === activeCategoryId)
@@ -35,7 +47,7 @@ export default function PublicMenu() {
 
   const selectCategory = (categoryId) => {
     setActiveCategoryId(categoryId);
-    setVisibleCount(5);
+    setVisibleCount(getInitialVisibleCount());
   };
 
   return (
