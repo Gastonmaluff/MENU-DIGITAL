@@ -582,6 +582,16 @@ button { cursor: pointer; }
   filter: var(--product-shadow);
   pointer-events: none;
 }
+.product-card[style*='--product-image-scale'] .product-image,
+.featured-product[style*='--product-image-scale'] .product-image {
+  transform:
+    translate(
+      var(--product-image-x, 0),
+      var(--product-image-y, 0)
+    )
+    scale(var(--product-image-scale, 1));
+  transform-origin: center center;
+}
 .product-image--small,
 .product-image--tiny {
   filter: var(--product-shadow-card);

@@ -1,11 +1,17 @@
 import { formatPrice } from '../../utils/format';
+import { getProductImageTuningStyle } from '../../utils/productImageTuning';
 import { getProductImageUrl } from '../../utils/productImages';
 import ProductImage from './ProductImage';
 import ProductOptionIcons from './ProductOptionIcons';
 
 export default function ProductCard({ product, variantGroups, onOpen }) {
   return (
-    <button className="product-card floating-product" type="button" onClick={() => onOpen(product)}>
+    <button
+      className="product-card floating-product"
+      type="button"
+      style={getProductImageTuningStyle(product, 'card')}
+      onClick={() => onOpen(product)}
+    >
       <div className="product-card-image-area">
         <ProductImage size="small" src={getProductImageUrl(product)} alt={product.name} />
       </div>

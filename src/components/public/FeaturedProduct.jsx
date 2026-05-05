@@ -1,5 +1,6 @@
 import { Sparkles } from 'lucide-react';
 import { formatPrice } from '../../utils/format';
+import { getProductImageTuningStyle } from '../../utils/productImageTuning';
 import { getProductFeaturedImageUrl, getProductImageUrl } from '../../utils/productImages';
 import ProductImage from './ProductImage';
 
@@ -7,7 +8,12 @@ export default function FeaturedProduct({ product, onOpen }) {
   if (!product) return null;
 
   return (
-    <button className="featured-product" type="button" onClick={() => onOpen(product)}>
+    <button
+      className="featured-product"
+      type="button"
+      style={getProductImageTuningStyle(product, 'featured')}
+      onClick={() => onOpen(product)}
+    >
       <div className="featured-copy">
         {product.featured && (
           <span className="featured-chip">
