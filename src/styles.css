@@ -264,166 +264,120 @@ button { cursor: pointer; }
   z-index: 2;
   pointer-events: none;
 }
-.coffee-steam,
-.savory-steam,
-.iced-motion,
-.sweet-sparkles,
-.leaf-drift {
-  position: absolute;
-  inset: 0;
+.category-premium-icon {
+  width: 42px;
+  height: 42px;
+  overflow: visible;
+}
+.category-premium-icon * {
+  vector-effect: non-scaling-stroke;
+}
+.premium-icon-scale {
+  transform: scale(1.14);
+  transform-origin: 24px 24px;
+}
+.icon-steam,
+.ice-cube,
+.cold-drop,
+.cake-sparkle,
+.leaf-fall {
+  transform-box: fill-box;
+  transform-origin: center;
   pointer-events: none;
 }
-.coffee-steam,
-.savory-steam {
-  inset: -9px 0 auto;
-  height: 18px;
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-}
-.coffee-steam i,
-.savory-steam i {
-  width: 2px;
-  height: 13px;
-  border-radius: 999px;
-  background: currentColor;
-  opacity: 0;
-  transform: translateY(5px);
-}
-.category-icon-shell.is-active[data-animation='coffee'] .coffee-steam i,
-.category-pill:hover .category-icon-shell[data-animation='coffee'] .coffee-steam i,
-.category-icon-shell.is-active[data-animation='savory'] .savory-steam i,
-.category-pill:hover .category-icon-shell[data-animation='savory'] .savory-steam i {
-  animation: steam-rise 3s ease-in-out infinite;
-}
-.category-icon-shell.is-active[data-animation='coffee'] .coffee-steam i:nth-child(2),
-.category-pill:hover .category-icon-shell[data-animation='coffee'] .coffee-steam i:nth-child(2),
-.category-icon-shell.is-active[data-animation='savory'] .savory-steam i:nth-child(2),
-.category-pill:hover .category-icon-shell[data-animation='savory'] .savory-steam i:nth-child(2) {
-  animation-delay: 0.45s;
-}
-.category-icon-shell.is-active[data-animation='coffee'] .coffee-steam i:nth-child(3),
-.category-pill:hover .category-icon-shell[data-animation='coffee'] .coffee-steam i:nth-child(3) {
-  animation-delay: 0.9s;
-}
-.iced-motion i,
-.iced-motion b {
-  position: absolute;
-  z-index: 3;
-  width: 6px;
-  height: 6px;
-  border: 1.5px solid currentColor;
-  border-radius: 2px;
+.icon-steam {
   opacity: 0.42;
 }
-.iced-motion i:nth-child(1) {
-  left: 14px;
-  top: 12px;
+.ice-cube,
+.cold-drop {
+  opacity: 0.5;
 }
-.iced-motion i:nth-child(2) {
-  right: 13px;
-  top: 17px;
+.cake-sparkle {
+  opacity: 0.4;
 }
-.iced-motion b {
-  left: 20px;
-  bottom: 7px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
+.category-icon-shell.is-active .icon-steam,
+.category-pill:hover .icon-steam {
+  animation: premium-steam-rise 3.2s ease-in-out infinite;
 }
-.category-icon-shell.is-active[data-animation='iced'] .iced-motion i,
-.category-pill:hover .category-icon-shell[data-animation='iced'] .iced-motion i,
-.category-icon-shell.is-active[data-animation='iced'] .iced-motion b,
-.category-pill:hover .category-icon-shell[data-animation='iced'] .iced-motion b {
-  animation: ice-float 3.2s ease-in-out infinite;
+.category-icon-shell.is-active .icon-steam--two,
+.category-pill:hover .icon-steam--two {
+  animation-delay: 0.38s;
 }
-.category-icon-shell.is-active[data-animation='iced'] .iced-motion i:nth-child(2),
-.category-pill:hover .category-icon-shell[data-animation='iced'] .iced-motion i:nth-child(2) {
-  animation-delay: 0.55s;
+.category-icon-shell.is-active .icon-steam--three,
+.category-pill:hover .icon-steam--three {
+  animation-delay: 0.76s;
 }
-.sweet-sparkles i {
-  position: absolute;
-  z-index: 3;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.24;
+.category-icon-shell.is-active .ice-cube,
+.category-pill:hover .ice-cube {
+  animation: premium-ice-shift 3.1s ease-in-out infinite;
 }
-.sweet-sparkles i:nth-child(1) {
-  left: 7px;
-  top: 8px;
+.category-icon-shell.is-active .ice-cube--two,
+.category-pill:hover .ice-cube--two {
+  animation-delay: 0.45s;
 }
-.sweet-sparkles i:nth-child(2) {
-  right: 8px;
-  top: 11px;
+.category-icon-shell.is-active .ice-cube--three,
+.category-pill:hover .ice-cube--three {
+  animation-delay: 0.9s;
 }
-.sweet-sparkles i:nth-child(3) {
-  right: 11px;
-  bottom: 7px;
+.category-icon-shell.is-active .cold-drop,
+.category-pill:hover .cold-drop {
+  animation: premium-cold-drift 3.4s ease-in-out infinite;
 }
-.category-icon-shell.is-active[data-animation='sweet'] .sweet-sparkles i,
-.category-pill:hover .category-icon-shell[data-animation='sweet'] .sweet-sparkles i {
-  animation: sweet-shimmer 2.7s ease-in-out infinite;
+.category-icon-shell.is-active .cold-drop--two,
+.category-pill:hover .cold-drop--two {
+  animation-delay: 0.7s;
 }
-.category-icon-shell.is-active[data-animation='sweet'] .sweet-sparkles i:nth-child(2),
-.category-pill:hover .category-icon-shell[data-animation='sweet'] .sweet-sparkles i:nth-child(2) {
+.category-icon-shell.is-active .cake-sparkle,
+.category-pill:hover .cake-sparkle {
+  animation: premium-sparkle 2.9s ease-in-out infinite;
+}
+.category-icon-shell.is-active .cake-sparkle--two,
+.category-pill:hover .cake-sparkle--two {
   animation-delay: 0.42s;
 }
-.category-icon-shell.is-active[data-animation='sweet'] .sweet-sparkles i:nth-child(3),
-.category-pill:hover .category-icon-shell[data-animation='sweet'] .sweet-sparkles i:nth-child(3) {
+.category-icon-shell.is-active .cake-sparkle--three,
+.category-pill:hover .cake-sparkle--three {
   animation-delay: 0.84s;
 }
-.leaf-drift i {
-  position: absolute;
-  z-index: 1;
-  left: 6px;
-  top: 8px;
-  width: 12px;
-  height: 7px;
-  border: 1.5px solid currentColor;
-  border-left: 0;
-  border-bottom: 0;
-  border-radius: 999px 0 999px 0;
-  opacity: 0.28;
-  transform: rotate(-26deg);
+.category-icon-shell.is-active .leaf-fall,
+.category-pill:hover .leaf-fall {
+  animation: premium-leaf-fall 3.8s cubic-bezier(0.42, 0, 0.2, 1) infinite;
 }
-.category-icon-shell.is-active[data-animation='leaf'] .leaf-drift i,
-.category-pill:hover .category-icon-shell[data-animation='leaf'] .leaf-drift i {
-  animation: leaf-drift 3.4s ease-in-out infinite;
-}
-@keyframes steam-rise {
+@keyframes premium-steam-rise {
   0%, 100% {
-    opacity: 0;
-    transform: translateY(5px) scaleY(0.75);
+    opacity: 0.18;
+    transform: translateY(1px);
   }
-  38% {
-    opacity: 0.42;
+  44% {
+    opacity: 0.58;
   }
-  68% {
-    opacity: 0;
-    transform: translateY(-4px) scaleY(1);
+  76% {
+    opacity: 0.08;
+    transform: translateY(-3px);
   }
 }
-@keyframes ice-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.34; }
-  50% { transform: translateY(-3px) rotate(7deg); opacity: 0.62; }
+@keyframes premium-ice-shift {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.42; }
+  50% { transform: translateY(-1.8px) rotate(4deg); opacity: 0.66; }
 }
-@keyframes sweet-shimmer {
-  0%, 100% { transform: scale(0.75); opacity: 0.18; }
-  45% { transform: scale(1.25); opacity: 0.72; }
+@keyframes premium-cold-drift {
+  0%, 100% { transform: translateX(0); opacity: 0.26; }
+  50% { transform: translateX(1.6px); opacity: 0.54; }
 }
-@keyframes leaf-drift {
-  0%, 100% { transform: translateX(0) translateY(0) rotate(-26deg); opacity: 0.22; }
-  50% { transform: translateX(5px) translateY(-3px) rotate(-12deg); opacity: 0.55; }
+@keyframes premium-sparkle {
+  0%, 100% { transform: scale(0.82); opacity: 0.22; }
+  46% { transform: scale(1.16); opacity: 0.72; }
+}
+@keyframes premium-leaf-fall {
+  0%, 100% { transform: translateX(-1px) translateY(-0.5px) rotate(-2deg); }
+  50% { transform: translateX(2.2px) translateY(1.6px) rotate(4deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .coffee-steam i,
-  .savory-steam i,
-  .iced-motion i,
-  .iced-motion b,
-  .sweet-sparkles i,
-  .leaf-drift i,
+  .icon-steam,
+  .ice-cube,
+  .cold-drop,
+  .cake-sparkle,
+  .leaf-fall,
   .category-content-panel,
   .category-transition-skeleton span {
     animation: none !important;
@@ -1712,8 +1666,8 @@ textarea {
     height: 38px;
   }
   .category-main-icon {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
   }
   .category-label {
     font-size: 0.78rem;
@@ -1850,8 +1804,8 @@ textarea {
     height: 34px;
   }
   .category-main-icon {
-    width: 29px;
-    height: 29px;
+    width: 35px;
+    height: 35px;
   }
   .category-label {
     font-size: 0.76rem;
@@ -1961,8 +1915,8 @@ textarea {
     height: 36px;
   }
   .category-main-icon {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
   }
   .category-label {
     font-size: 0.76rem;
