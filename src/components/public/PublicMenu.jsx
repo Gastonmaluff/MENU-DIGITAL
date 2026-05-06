@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
 import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
 import { useSettings } from '../../hooks/useSettings';
@@ -25,6 +24,8 @@ const categoryFallbackMeta = {
   'no-coffee': { name: 'No Coffee', icon: 'Leaf', sortOrder: 5 },
 };
 
+const preloadingImages = new Set();
+
 const titleFromSlug = (slug) =>
   slug
     .split('-')
@@ -41,14 +42,27 @@ const preloadImages = (urls) => {
       (url) =>
         new Promise((resolve) => {
           const image = new Image();
+          preloadingImages.add(image);
+          const settle = () => {
+            preloadingImages.delete(image);
+            resolve();
+          };
           image.decoding = 'async';
-          image.onload = resolve;
-          image.onerror = resolve;
+          image.onload = settle;
+          image.onerror = settle;
           image.src = url;
         }),
     ),
   );
 };
+
+const preloadImagesWithTimeout = (urls, timeoutMs = 8000) =>
+  Promise.race([
+    preloadImages(urls),
+    new Promise((resolve) => {
+      window.setTimeout(resolve, timeoutMs);
+    }),
+  ]);
 
 export default function PublicMenu() {
   const { settings, syncing: syncingSettings, error: settingsError } = useSettings();
@@ -280,7 +294,14 @@ export default function PublicMenu() {
       }
     }, 150);
 
-    preloadImages(getVisibleCategoryImageUrls(contentCategoryId, 'more')).then(() => {
+    preloadImagesWithTimeout(getVisibleCategoryImageUrls(contentCategoryId, 'more')).then(() => {
+      if (transitionRequestRef.current !== requestId) return;
+      window.clearTimeout(preparationTimeoutRef.current);
+      setIsPreparingCategory(false);
+      setShowPreparationOverlay(false);
+      setMoreCategoryId(contentCategoryId);
+    }).catch((error) => {
+      console.error('Error precargando más opciones', error);
       if (transitionRequestRef.current !== requestId) return;
       window.clearTimeout(preparationTimeoutRef.current);
       setIsPreparingCategory(false);
@@ -298,18 +319,9 @@ export default function PublicMenu() {
     setMoreCategoryId('');
   };
 
-  const renderCategoryContent = ({ category, isMoreView, featuredProduct, gridProducts, visibleCount, hasMore }) => (
+  const renderCategoryContent = ({ isMoreView, featuredProduct, gridProducts, visibleCount, hasMore }) => (
     <div className={`category-view ${isMoreView ? 'category-view--more' : ''}`}>
-      {isMoreView ? (
-        <div className="category-more-header">
-          <button className="category-back-button" type="button" onClick={closeMoreForCategory}>
-            <ArrowLeft size={18} /> Volver a {category?.name || 'categoría'}
-          </button>
-          <span>Más opciones</span>
-        </div>
-      ) : (
-        <FeaturedProduct product={featuredProduct} onOpen={setSelectedProduct} />
-      )}
+      {!isMoreView && <FeaturedProduct product={featuredProduct} onOpen={setSelectedProduct} />}
       {(gridProducts.length > 0 || !featuredProduct || isMoreView) && (
         <ProductGrid
           products={gridProducts}
@@ -318,6 +330,8 @@ export default function PublicMenu() {
           onOpen={setSelectedProduct}
           onShowMore={showMoreForCategory}
           hasMore={hasMore}
+          onBack={isMoreView ? closeMoreForCategory : undefined}
+          backLabel="Volver"
           emptyTitle={isMoreView ? 'No hay más opciones disponibles' : undefined}
           emptyText={isMoreView ? 'Volvé a la categoría principal para ver los productos destacados.' : undefined}
         />
