@@ -1806,7 +1806,10 @@ textarea {
     margin: 0 0 -14px;
   }
   .category-view--more .product-grid {
-    padding-top: 40px;
+    padding-top: 88px;
+  }
+  .category-view--more .product-card-image-area {
+    top: -46px;
   }
 }
 
@@ -1934,7 +1937,10 @@ textarea {
     margin: 0 0 -12px;
   }
   .category-view--more .product-grid {
-    padding-top: 38px;
+    padding-top: 72px;
+  }
+  .category-view--more .product-card-image-area {
+    top: -40px;
   }
 }
 
