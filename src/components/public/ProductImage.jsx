@@ -15,6 +15,7 @@ export default function ProductImage({ src, alt, size = 'medium', loading = 'laz
     <div className={`product-image-frame product-image-frame--${size}`}>
       {visibleSrc ? (
         <img
+          key={imageSrc}
           className={`product-image product-image--${size}`}
           src={imageSrc}
           alt={alt}

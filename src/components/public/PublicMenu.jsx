@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
 import { useSettings } from '../../hooks/useSettings';
@@ -13,7 +13,7 @@ import ProductGrid from './ProductGrid';
 import ThemeWrapper from './ThemeWrapper';
 
 const tabletMenuQuery = '(min-width: 700px) and (max-width: 900px) and (orientation: portrait)';
-const CATEGORY_TRANSITION_MS = 280;
+const CATEGORY_TRANSITION_MS = 340;
 const getInitialVisibleCount = () =>
   typeof window !== 'undefined' && window.matchMedia(tabletMenuQuery).matches ? 2 : 5;
 
@@ -62,7 +62,14 @@ export default function PublicMenu() {
   const [visibleCategoryId, setVisibleCategoryId] = useState('');
   const [categoryTransition, setCategoryTransition] = useState(null);
   const [initialMenuReady, setInitialMenuReady] = useState(false);
+  const [isPreparingCategory, setIsPreparingCategory] = useState(false);
+  const [showPreparationOverlay, setShowPreparationOverlay] = useState(false);
+  const [stageHeight, setStageHeight] = useState(0);
+  const currentPanelRef = useRef(null);
+  const stageRef = useRef(null);
+  const transitionRequestRef = useRef(0);
   const transitionTimeoutRef = useRef(null);
+  const preparationTimeoutRef = useRef(null);
 
   useEffect(() => {
     const media = window.matchMedia(tabletMenuQuery);
@@ -105,7 +112,7 @@ export default function PublicMenu() {
   const contentCategoryId = activeCategories.some((category) => category.id === visibleCategoryId)
     ? visibleCategoryId
     : currentCategoryId;
-  const getCategoryContent = (categoryId) => {
+  const getCategoryContent = useCallback((categoryId) => {
     const categoryProducts = activeProducts.filter((product) => product.categoryId === categoryId);
     const featuredProduct = categoryProducts.find((product) => product.featured) || categoryProducts[0];
     const gridProducts = categoryProducts.filter((product) => product.id !== featuredProduct?.id);
@@ -118,18 +125,22 @@ export default function PublicMenu() {
       visibleCount,
       hasMore: !isExpanded && gridProducts.length > visibleCount,
     };
-  };
+  }, [activeProducts, collapsedVisibleCount, expandedCategories]);
   const content = getCategoryContent(contentCategoryId);
   const firebaseReady = !syncingSettings && !syncingCategories && !syncingProducts && !syncingVariants;
   const firebaseError = settingsError || categoriesError || productsError;
-  const initialImageUrls = useMemo(() => {
-    if (!firebaseReady) return [];
-    const visibleGridProducts = content.gridProducts.slice(0, content.visibleCount);
+  const getVisibleCategoryImageUrls = useCallback((categoryId) => {
+    const categoryContent = getCategoryContent(categoryId);
+    const visibleGridProducts = categoryContent.gridProducts.slice(0, categoryContent.visibleCount);
     return [
-      getProductFeaturedImageUrl(content.featuredProduct) || getProductImageUrl(content.featuredProduct),
+      getProductFeaturedImageUrl(categoryContent.featuredProduct) || getProductImageUrl(categoryContent.featuredProduct),
       ...visibleGridProducts.map(getProductImageUrl),
     ].map(resolveAssetUrl);
-  }, [content.featuredProduct, content.gridProducts, content.visibleCount, firebaseReady]);
+  }, [getCategoryContent]);
+  const initialImageUrls = useMemo(() => {
+    if (!firebaseReady) return [];
+    return getVisibleCategoryImageUrls(contentCategoryId);
+  }, [contentCategoryId, firebaseReady, getVisibleCategoryImageUrls]);
 
   useEffect(() => {
     if (!currentCategoryId) return;
@@ -167,30 +178,89 @@ export default function PublicMenu() {
     return () => window.clearTimeout(timeoutId);
   }, [activeProducts, initialMenuReady]);
 
+  useEffect(() => {
+    if (categoryTransition || !currentPanelRef.current) return undefined;
+
+    const updateHeight = () => {
+      const nextHeight = Math.ceil(currentPanelRef.current?.getBoundingClientRect().height || 0);
+      if (nextHeight) setStageHeight(nextHeight);
+    };
+
+    updateHeight();
+
+    if (!('ResizeObserver' in window)) return undefined;
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(currentPanelRef.current);
+    return () => observer.disconnect();
+  }, [categoryTransition, contentCategoryId, content.gridProducts.length, content.visibleCount]);
+
   useEffect(
     () => () => {
+      transitionRequestRef.current += 1;
       window.clearTimeout(transitionTimeoutRef.current);
+      window.clearTimeout(preparationTimeoutRef.current);
     },
     [],
   );
 
   const selectCategory = (categoryId) => {
-    if (!categoryId || categoryId === currentCategoryId || categoryTransition) return;
+    if (!categoryId || !activeCategories.some((category) => category.id === categoryId)) return;
 
     const fromCategoryId = contentCategoryId || currentCategoryId;
+    if (categoryId === activeCategoryId && categoryId === fromCategoryId && !categoryTransition && !isPreparingCategory) {
+      return;
+    }
+
+    const requestId = transitionRequestRef.current + 1;
+    transitionRequestRef.current = requestId;
+    window.clearTimeout(transitionTimeoutRef.current);
+    window.clearTimeout(preparationTimeoutRef.current);
+
+    const lockedHeight = Math.ceil(
+      currentPanelRef.current?.getBoundingClientRect().height ||
+        stageRef.current?.getBoundingClientRect().height ||
+        stageHeight ||
+        0,
+    );
+    if (lockedHeight) setStageHeight(lockedHeight);
+
+    setSelectedProduct(null);
+    setActiveCategoryId(categoryId);
+    setCategoryTransition(null);
+    setIsPreparingCategory(false);
+    setShowPreparationOverlay(false);
+
+    if (categoryId === fromCategoryId) {
+      setVisibleCategoryId(categoryId);
+      return;
+    }
+
     const fromIndex = activeCategories.findIndex((category) => category.id === fromCategoryId);
     const toIndex = activeCategories.findIndex((category) => category.id === categoryId);
     const direction = toIndex > fromIndex ? 'forward' : 'backward';
 
-    setSelectedProduct(null);
-    setActiveCategoryId(categoryId);
-    setCategoryTransition({ from: fromCategoryId, to: categoryId, direction });
+    setIsPreparingCategory(true);
+    preparationTimeoutRef.current = window.setTimeout(() => {
+      if (transitionRequestRef.current === requestId) {
+        setShowPreparationOverlay(true);
+      }
+    }, 150);
 
-    window.clearTimeout(transitionTimeoutRef.current);
-    transitionTimeoutRef.current = window.setTimeout(() => {
-      setVisibleCategoryId(categoryId);
-      setCategoryTransition(null);
-    }, CATEGORY_TRANSITION_MS);
+    preloadImages(getVisibleCategoryImageUrls(categoryId)).then(() => {
+      if (transitionRequestRef.current !== requestId) return;
+
+      window.clearTimeout(preparationTimeoutRef.current);
+      setIsPreparingCategory(false);
+      setShowPreparationOverlay(false);
+      setCategoryTransition({ from: fromCategoryId, to: categoryId, direction, requestId });
+
+      window.clearTimeout(transitionTimeoutRef.current);
+      transitionTimeoutRef.current = window.setTimeout(() => {
+        if (transitionRequestRef.current !== requestId) return;
+        setVisibleCategoryId(categoryId);
+        setCategoryTransition(null);
+      }, CATEGORY_TRANSITION_MS);
+    });
   };
 
   const showMoreForCategory = () => {
@@ -227,23 +297,36 @@ export default function PublicMenu() {
               categories={activeCategories}
               activeCategoryId={currentCategoryId}
               onSelect={selectCategory}
-              disabled={Boolean(categoryTransition)}
             />
             {firebaseError && (
               <div className="sync-status sync-status--soft">No pudimos sincronizar Firebase. Revisá la conexión.</div>
             )}
-            <section className={`category-content-stage ${categoryTransition ? 'is-transitioning' : ''}`} aria-live="polite">
+            <section
+              className={`category-content-stage ${categoryTransition ? 'is-transitioning' : ''} ${
+                isPreparingCategory ? 'is-preparing' : ''
+              }`}
+              style={stageHeight ? { '--category-stage-height': `${stageHeight}px` } : undefined}
+              aria-live="polite"
+              ref={stageRef}
+            >
+              {showPreparationOverlay && <CategoryTransitionSkeleton />}
               {categoryTransition ? (
                 <>
-                  <div className={`category-content-panel is-exiting is-${categoryTransition.direction}`}>
+                  <div
+                    className={`category-content-panel is-exiting is-${categoryTransition.direction}`}
+                    key={`exit-${categoryTransition.from}-${categoryTransition.requestId}`}
+                  >
                     {renderCategoryContent(getCategoryContent(categoryTransition.from))}
                   </div>
-                  <div className={`category-content-panel is-entering is-${categoryTransition.direction}`}>
+                  <div
+                    className={`category-content-panel is-entering is-${categoryTransition.direction}`}
+                    key={`enter-${categoryTransition.to}-${categoryTransition.requestId}`}
+                  >
                     {renderCategoryContent(getCategoryContent(categoryTransition.to))}
                   </div>
                 </>
               ) : (
-                <div className="category-content-panel is-current">
+                <div className="category-content-panel is-current" key={`current-${contentCategoryId}`} ref={currentPanelRef}>
                   {renderCategoryContent(content)}
                 </div>
               )}
@@ -259,6 +342,17 @@ export default function PublicMenu() {
         )}
       </main>
     </ThemeWrapper>
+  );
+}
+
+function CategoryTransitionSkeleton() {
+  return (
+    <div className="category-transition-skeleton" aria-hidden="true">
+      <span className="category-transition-skeleton__hero" />
+      <span className="category-transition-skeleton__grid" />
+      <span className="category-transition-skeleton__grid" />
+      <span className="category-transition-skeleton__grid" />
+    </div>
   );
 }
 
