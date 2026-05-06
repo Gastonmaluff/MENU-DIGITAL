@@ -8,7 +8,7 @@ import {
   Sparkles,
   Trash2,
 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
@@ -58,6 +58,8 @@ export default function PublicViewEditor() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const productFormRef = useRef(null);
+  const productNameInputRef = useRef(null);
 
   const activeCategory = categories.find((category) => category.id === activeCategoryId) || categories[0];
   const categoryProducts = useMemo(
@@ -145,6 +147,18 @@ export default function PublicViewEditor() {
     }
   };
 
+  const focusProductForm = useCallback(() => {
+    window.setTimeout(() => {
+      productFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      productNameInputRef.current?.focus({ preventScroll: true });
+    }, 80);
+  }, []);
+
+  const openProductEditor = useCallback((product) => {
+    setEditingProduct(product);
+    focusProductForm();
+  }, [focusProductForm]);
+
   return (
     <div className="admin-page editor-page">
       <div className="admin-page-header">
@@ -225,7 +239,7 @@ export default function PublicViewEditor() {
                   className="admin-primary-button"
                   type="button"
                   onClick={() =>
-                    setEditingProduct({
+                    openProductEditor({
                       ...emptyProduct,
                       categoryId: activeCategory.id,
                       sortOrder: categoryProducts.length + 1,
@@ -246,7 +260,7 @@ export default function PublicViewEditor() {
                     </div>
                     {product.featured && <span className="admin-mini-badge editor-badge"><Sparkles size={14} /> destacado</span>}
                     <div className="admin-actions">
-                      <button type="button" onClick={() => setEditingProduct(product)}><Edit3 size={17} /></button>
+                      <button type="button" onClick={() => openProductEditor(product)}><Edit3 size={17} /></button>
                       <button type="button" onClick={() => removeProduct(product)}><Trash2 size={17} /></button>
                     </div>
                   </article>
@@ -259,12 +273,15 @@ export default function PublicViewEditor() {
           )}
 
           {editingProduct && (
-            <ProductEditor
-              product={editingProduct}
-              saving={saving}
-              onCancel={() => setEditingProduct(null)}
-              onSave={saveProduct}
-            />
+            <div id="product-form" ref={productFormRef} className="product-form-anchor">
+              <ProductEditor
+                product={editingProduct}
+                saving={saving}
+                nameInputRef={productNameInputRef}
+                onCancel={() => setEditingProduct(null)}
+                onSave={saveProduct}
+              />
+            </div>
           )}
         </section>
       </div>
@@ -304,7 +321,7 @@ function CategoryEditor({ category, saving, onCancel, onSave }) {
   );
 }
 
-function ProductEditor({ product, saving, onCancel, onSave }) {
+function ProductEditor({ product, saving, nameInputRef, onCancel, onSave }) {
   const [pendingUploads, setPendingUploads] = useState(0);
   const [imageUploadError, setImageUploadError] = useState('');
   const [form, setForm] = useState({
@@ -349,7 +366,7 @@ function ProductEditor({ product, saving, onCancel, onSave }) {
         </div>
       </div>
       <div className="form-grid">
-        <label>Nombre<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /></label>
+        <label>Nombre<input ref={nameInputRef} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /></label>
         <label>Precio<input type="number" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} /></label>
         <label>Orden<input type="number" value={form.sortOrder} onChange={(event) => setForm({ ...form, sortOrder: event.target.value })} /></label>
         <label>Subtítulo<input value={form.shortDescription} onChange={(event) => setForm({ ...form, shortDescription: event.target.value })} /></label>

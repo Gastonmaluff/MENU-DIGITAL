@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
 import { useSettings } from '../../hooks/useSettings';
@@ -12,10 +13,9 @@ import ProductDetailModal from './ProductDetailModal';
 import ProductGrid from './ProductGrid';
 import ThemeWrapper from './ThemeWrapper';
 
-const tabletMenuQuery = '(min-width: 700px) and (max-width: 900px) and (orientation: portrait)';
 const CATEGORY_TRANSITION_MS = 340;
-const getInitialVisibleCount = () =>
-  typeof window !== 'undefined' && window.matchMedia(tabletMenuQuery).matches ? 2 : 5;
+const MAX_MAIN_PRODUCTS = 7;
+const MAIN_GRID_LIMIT_WITH_MORE = 5;
 
 const categoryFallbackMeta = {
   cafes: { name: 'Cafés', icon: 'Coffee', sortOrder: 1 },
@@ -57,8 +57,7 @@ export default function PublicMenu() {
   const { items: variantGroups, syncing: syncingVariants, usingDemo: usingDemoVariants } = useVariantGroups();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [collapsedVisibleCount, setCollapsedVisibleCount] = useState(getInitialVisibleCount);
-  const [expandedCategories, setExpandedCategories] = useState({});
+  const [moreCategoryId, setMoreCategoryId] = useState('');
   const [visibleCategoryId, setVisibleCategoryId] = useState('');
   const [categoryTransition, setCategoryTransition] = useState(null);
   const [initialMenuReady, setInitialMenuReady] = useState(false);
@@ -70,14 +69,6 @@ export default function PublicMenu() {
   const transitionRequestRef = useRef(0);
   const transitionTimeoutRef = useRef(null);
   const preparationTimeoutRef = useRef(null);
-
-  useEffect(() => {
-    const media = window.matchMedia(tabletMenuQuery);
-    const syncVisibleCount = () => setCollapsedVisibleCount(getInitialVisibleCount());
-    syncVisibleCount();
-    media.addEventListener('change', syncVisibleCount);
-    return () => media.removeEventListener('change', syncVisibleCount);
-  }, []);
 
   const publicProducts = useMemo(() => (usingDemoProducts ? [] : products), [products, usingDemoProducts]);
   const derivedCategories = useMemo(() => {
@@ -112,25 +103,32 @@ export default function PublicMenu() {
   const contentCategoryId = activeCategories.some((category) => category.id === visibleCategoryId)
     ? visibleCategoryId
     : currentCategoryId;
-  const getCategoryContent = useCallback((categoryId) => {
+  const getCategoryContent = useCallback((categoryId, viewMode = 'main') => {
+    const category = activeCategories.find((item) => item.id === categoryId);
     const categoryProducts = activeProducts.filter((product) => product.categoryId === categoryId);
     const featuredProduct = categoryProducts.find((product) => product.featured) || categoryProducts[0];
-    const gridProducts = categoryProducts.filter((product) => product.id !== featuredProduct?.id);
-    const isExpanded = Boolean(expandedCategories[categoryId]);
-    const visibleCount = isExpanded ? gridProducts.length : collapsedVisibleCount;
+    const secondaryProducts = categoryProducts.filter((product) => product.id !== featuredProduct?.id);
+    const hasMore = categoryProducts.length > MAX_MAIN_PRODUCTS;
+    const mainProducts = hasMore ? secondaryProducts.slice(0, MAIN_GRID_LIMIT_WITH_MORE) : secondaryProducts;
+    const moreProducts = hasMore ? secondaryProducts.slice(MAIN_GRID_LIMIT_WITH_MORE) : [];
+    const isMoreView = viewMode === 'more' && hasMore;
+    const gridProducts = isMoreView ? moreProducts : mainProducts;
 
     return {
-      featuredProduct,
+      category,
+      isMoreView,
+      featuredProduct: isMoreView ? null : featuredProduct,
       gridProducts,
-      visibleCount,
-      hasMore: !isExpanded && gridProducts.length > visibleCount,
+      visibleCount: gridProducts.length,
+      hasMore: !isMoreView && hasMore,
     };
-  }, [activeProducts, collapsedVisibleCount, expandedCategories]);
-  const content = getCategoryContent(contentCategoryId);
+  }, [activeCategories, activeProducts]);
+  const contentViewMode = moreCategoryId === contentCategoryId ? 'more' : 'main';
+  const content = getCategoryContent(contentCategoryId, contentViewMode);
   const firebaseReady = !syncingSettings && !syncingCategories && !syncingProducts && !syncingVariants;
   const firebaseError = settingsError || categoriesError || productsError;
-  const getVisibleCategoryImageUrls = useCallback((categoryId) => {
-    const categoryContent = getCategoryContent(categoryId);
+  const getVisibleCategoryImageUrls = useCallback((categoryId, viewMode = 'main') => {
+    const categoryContent = getCategoryContent(categoryId, viewMode);
     const visibleGridProducts = categoryContent.gridProducts.slice(0, categoryContent.visibleCount);
     return [
       getProductFeaturedImageUrl(categoryContent.featuredProduct) || getProductImageUrl(categoryContent.featuredProduct),
@@ -192,7 +190,7 @@ export default function PublicMenu() {
     const observer = new ResizeObserver(updateHeight);
     observer.observe(currentPanelRef.current);
     return () => observer.disconnect();
-  }, [categoryTransition, contentCategoryId, content.gridProducts.length, content.visibleCount]);
+  }, [categoryTransition, contentCategoryId, content.gridProducts.length, content.visibleCount, contentViewMode]);
 
   useEffect(
     () => () => {
@@ -207,7 +205,14 @@ export default function PublicMenu() {
     if (!categoryId || !activeCategories.some((category) => category.id === categoryId)) return;
 
     const fromCategoryId = contentCategoryId || currentCategoryId;
-    if (categoryId === activeCategoryId && categoryId === fromCategoryId && !categoryTransition && !isPreparingCategory) {
+    const fromViewMode = moreCategoryId === fromCategoryId ? 'more' : 'main';
+    if (
+      categoryId === activeCategoryId &&
+      categoryId === fromCategoryId &&
+      fromViewMode === 'main' &&
+      !categoryTransition &&
+      !isPreparingCategory
+    ) {
       return;
     }
 
@@ -226,12 +231,12 @@ export default function PublicMenu() {
 
     setSelectedProduct(null);
     setActiveCategoryId(categoryId);
+    setMoreCategoryId('');
     setCategoryTransition(null);
     setIsPreparingCategory(false);
     setShowPreparationOverlay(false);
 
     if (categoryId === fromCategoryId) {
-      setVisibleCategoryId(categoryId);
       return;
     }
 
@@ -252,7 +257,7 @@ export default function PublicMenu() {
       window.clearTimeout(preparationTimeoutRef.current);
       setIsPreparingCategory(false);
       setShowPreparationOverlay(false);
-      setCategoryTransition({ from: fromCategoryId, to: categoryId, direction, requestId });
+      setCategoryTransition({ from: fromCategoryId, fromViewMode, to: categoryId, direction, requestId });
 
       window.clearTimeout(transitionTimeoutRef.current);
       transitionTimeoutRef.current = window.setTimeout(() => {
@@ -265,24 +270,59 @@ export default function PublicMenu() {
 
   const showMoreForCategory = () => {
     if (!contentCategoryId || categoryTransition) return;
-    setExpandedCategories((current) => ({
-      ...current,
-      [contentCategoryId]: true,
-    }));
+    const requestId = transitionRequestRef.current + 1;
+    transitionRequestRef.current = requestId;
+    window.clearTimeout(preparationTimeoutRef.current);
+    setIsPreparingCategory(true);
+    preparationTimeoutRef.current = window.setTimeout(() => {
+      if (transitionRequestRef.current === requestId) {
+        setShowPreparationOverlay(true);
+      }
+    }, 150);
+
+    preloadImages(getVisibleCategoryImageUrls(contentCategoryId, 'more')).then(() => {
+      if (transitionRequestRef.current !== requestId) return;
+      window.clearTimeout(preparationTimeoutRef.current);
+      setIsPreparingCategory(false);
+      setShowPreparationOverlay(false);
+      setMoreCategoryId(contentCategoryId);
+    });
   };
 
-  const renderCategoryContent = ({ featuredProduct, gridProducts, visibleCount, hasMore }) => (
-    <>
-      <FeaturedProduct product={featuredProduct} onOpen={setSelectedProduct} />
-      <ProductGrid
-        products={gridProducts}
-        variantGroups={publicVariantGroups}
-        visibleCount={visibleCount}
-        onOpen={setSelectedProduct}
-        onShowMore={showMoreForCategory}
-        hasMore={hasMore}
-      />
-    </>
+  const closeMoreForCategory = () => {
+    if (!contentCategoryId || categoryTransition) return;
+    transitionRequestRef.current += 1;
+    window.clearTimeout(preparationTimeoutRef.current);
+    setIsPreparingCategory(false);
+    setShowPreparationOverlay(false);
+    setMoreCategoryId('');
+  };
+
+  const renderCategoryContent = ({ category, isMoreView, featuredProduct, gridProducts, visibleCount, hasMore }) => (
+    <div className={`category-view ${isMoreView ? 'category-view--more' : ''}`}>
+      {isMoreView ? (
+        <div className="category-more-header">
+          <button className="category-back-button" type="button" onClick={closeMoreForCategory}>
+            <ArrowLeft size={18} /> Volver a {category?.name || 'categoría'}
+          </button>
+          <span>Más opciones</span>
+        </div>
+      ) : (
+        <FeaturedProduct product={featuredProduct} onOpen={setSelectedProduct} />
+      )}
+      {(gridProducts.length > 0 || !featuredProduct || isMoreView) && (
+        <ProductGrid
+          products={gridProducts}
+          variantGroups={publicVariantGroups}
+          visibleCount={visibleCount}
+          onOpen={setSelectedProduct}
+          onShowMore={showMoreForCategory}
+          hasMore={hasMore}
+          emptyTitle={isMoreView ? 'No hay más opciones disponibles' : undefined}
+          emptyText={isMoreView ? 'Volvé a la categoría principal para ver los productos destacados.' : undefined}
+        />
+      )}
+    </div>
   );
 
   return (
@@ -316,7 +356,7 @@ export default function PublicMenu() {
                     className={`category-content-panel is-exiting is-${categoryTransition.direction}`}
                     key={`exit-${categoryTransition.from}-${categoryTransition.requestId}`}
                   >
-                    {renderCategoryContent(getCategoryContent(categoryTransition.from))}
+                    {renderCategoryContent(getCategoryContent(categoryTransition.from, categoryTransition.fromViewMode))}
                   </div>
                   <div
                     className={`category-content-panel is-entering is-${categoryTransition.direction}`}

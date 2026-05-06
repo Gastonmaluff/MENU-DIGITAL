@@ -8,13 +8,16 @@ export default function ProductGrid({
   onOpen,
   onShowMore,
   hasMore,
+  moreLabel = 'Ver más opciones',
+  emptyTitle = 'No hay productos activos en esta categoría',
+  emptyText = 'Podés cargar productos desde el panel admin.',
 }) {
   if (products.length === 0) {
     return (
       <div className="empty-state">
         <Coffee size={38} strokeWidth={1.4} />
-        <h3>No hay productos activos en esta categoría</h3>
-        <p>Podés cargar productos desde el panel admin.</p>
+        <h3>{emptyTitle}</h3>
+        <p>{emptyText}</p>
       </div>
     );
   }
@@ -34,7 +37,7 @@ export default function ProductGrid({
           <span className="see-more-icon">
             <Coffee size={38} strokeWidth={1.3} />
           </span>
-          <strong>Ver más</strong>
+          <strong>{moreLabel}</strong>
           <span className="see-more-action">
             <ArrowRight size={24} />
           </span>
