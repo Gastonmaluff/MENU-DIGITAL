@@ -5,7 +5,7 @@ import { settingsService } from '../../services/settingsService';
 import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 
 export default function SettingsForm() {
-  const { settings, syncing, error, usingDemo, reload } = useSettings();
+  const { settings, syncing, error, reload } = useSettings();
   const [form, setForm] = useState({ themeMode: settings.themeMode || 'light' });
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -40,7 +40,6 @@ export default function SettingsForm() {
         </div>
       </div>
 
-      {usingDemo && <div className="admin-warning">Al guardar se creara el documento `settings/main`.</div>}
       {syncing && <div className="admin-inline-sync"><span /> Sincronizando configuracion...</div>}
       {error && <div className="admin-error">{error}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}

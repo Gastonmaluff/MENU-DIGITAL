@@ -51,8 +51,8 @@ const emptyProduct = {
 
 export default function PublicViewEditor() {
   const { user } = useAuth();
-  const { items: categories, syncing: syncingCategories, error: categoriesError, usingDemo: demoCategories, reload: reloadCategories } = useCategories();
-  const { items: products, syncing: syncingProducts, error: productsError, usingDemo: demoProducts, reload: reloadProducts } = useProducts();
+  const { items: categories, syncing: syncingCategories, error: categoriesError, reload: reloadCategories } = useCategories();
+  const { items: products, syncing: syncingProducts, error: productsError, reload: reloadProducts } = useProducts();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -175,9 +175,6 @@ export default function PublicViewEditor() {
         </button>
       </div>
 
-      {(demoCategories || demoProducts) && (
-        <div className="admin-warning">Estás viendo datos demo si Firestore está vacío. Al guardar, se persiste en Firebase.</div>
-      )}
       {(syncingCategories || syncingProducts) && <div className="admin-inline-sync"><span /> Sincronizando contenido...</div>}
       {(categoriesError || productsError) && <div className="admin-error">{categoriesError || productsError}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}

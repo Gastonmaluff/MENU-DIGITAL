@@ -8,7 +8,7 @@ import { slugify } from '../../utils/format';
 const emptyCategory = { name: '', icon: 'Coffee', sortOrder: 1, active: true };
 
 export default function CategoryList() {
-  const { items, syncing, error, usingDemo, reload } = useCategories();
+  const { items, syncing, error, reload } = useCategories();
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -50,7 +50,6 @@ export default function CategoryList() {
           <Plus size={18} /> Nueva categoría
         </button>
       </div>
-      {usingDemo && <div className="admin-warning">Estás viendo datos demo. Creá una categoría para guardar en Firestore.</div>}
       {syncing && <div className="admin-inline-sync"><span /> Sincronizando categorías...</div>}
       {error && <div className="admin-error">{error}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}

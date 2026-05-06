@@ -15,7 +15,7 @@ const emptyGroup = {
 };
 
 export default function VariantGroupList() {
-  const { items, syncing, error, usingDemo, reload } = useVariantGroups();
+  const { items, syncing, error, reload } = useVariantGroups();
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -57,7 +57,6 @@ export default function VariantGroupList() {
           <Plus size={18} /> Nuevo grupo
         </button>
       </div>
-      {usingDemo && <div className="admin-warning">Estás viendo variantes demo. Creá un grupo para guardar en Firestore.</div>}
       {syncing && <div className="admin-inline-sync"><span /> Sincronizando variantes...</div>}
       {error && <div className="admin-error">{error}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}
