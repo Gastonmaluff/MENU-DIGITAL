@@ -6,28 +6,42 @@ const radiusMap = {
   large: '30px',
 };
 
+const themePalette = {
+  light: {
+    accent: '#B87934',
+    accentDark: '#A9682E',
+    background: '#F7F1EA',
+  },
+  dark: {
+    accent: '#B87935',
+    accentDark: '#A9682E',
+    background: '#14110E',
+  },
+};
+
 export default function ThemeWrapper({ settings, children }) {
+  const themeMode = settings.themeMode === 'dark' ? 'dark' : 'light';
+  const palette = themePalette[themeMode];
+
   const style = useMemo(
     () => ({
-      '--accent': settings.primaryColor || '#B87934',
-      '--accent-dark': settings.primaryColor || '#A9682E',
-      '--bg': settings.themeMode === 'dark'
-        ? settings.darkBackgroundColor || '#0D0D0F'
-        : settings.backgroundColor || '#F7F1EA',
+      '--accent': palette.accent,
+      '--accent-dark': palette.accentDark,
+      '--bg': palette.background,
       '--radius-card': radiusMap[settings.borderRadius] || radiusMap.large,
       '--product-shadow-choice': `var(--product-shadow-${settings.productShadowIntensity || 'medium'})`,
     }),
-    [settings],
+    [palette, settings.borderRadius, settings.productShadowIntensity],
   );
 
   useEffect(() => {
-    document.documentElement.dataset.theme = settings.themeMode || 'light';
-  }, [settings.themeMode]);
+    document.documentElement.dataset.theme = themeMode;
+  }, [themeMode]);
 
   return (
     <div
       className="theme-shell"
-      data-theme={settings.themeMode || 'light'}
+      data-theme={themeMode}
       data-shadow={settings.productShadowIntensity || 'medium'}
       style={style}
     >

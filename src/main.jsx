@@ -4,7 +4,6 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminLogin from './components/admin/AdminLogin';
-import AppearanceForm from './components/admin/AppearanceForm';
 import CategoryList from './components/admin/CategoryList';
 import ProductList from './components/admin/ProductList';
 import ProtectedRoute from './components/admin/ProtectedRoute';
