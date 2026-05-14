@@ -1,10 +1,12 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import BaristaPanel from './components/barista/BaristaPanel';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminLogin from './components/admin/AdminLogin';
 import CategoryList from './components/admin/CategoryList';
+import OrderList from './components/admin/OrderList';
 import ProductList from './components/admin/ProductList';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import PublicViewEditor from './components/admin/PublicViewEditor';
@@ -12,6 +14,7 @@ import SettingsForm from './components/admin/SettingsForm';
 import VariantGroupList from './components/admin/VariantGroupList';
 import PublicMenu from './components/public/PublicMenu';
 import { AuthProvider } from './hooks/useAuth';
+import { USER_ROLES } from './utils/roles';
 import './styles.css';
 
 function App() {
@@ -22,16 +25,25 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<PublicMenu />} />
+          <Route
+            path="/barista"
+            element={
+              <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.BARISTA]}>
+                <BaristaPanel />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
             path="/admin"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
                 <AdminLayout />
               </ProtectedRoute>
             }
           >
             <Route index element={<AdminDashboard />} />
+            <Route path="orders" element={<OrderList />} />
             <Route path="menu" element={<PublicViewEditor />} />
             <Route path="categories" element={<CategoryList />} />
             <Route path="products" element={<ProductList />} />

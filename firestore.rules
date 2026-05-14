@@ -6,24 +6,66 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function userProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function hasActiveRole(role) {
+      return isSignedIn() &&
+        userProfile().data.active == true &&
+        userProfile().data.role == role;
+    }
+
+    function isAdmin() {
+      return hasActiveRole('admin');
+    }
+
+    function isBarista() {
+      return hasActiveRole('barista');
+    }
+
+    function isCashier() {
+      return hasActiveRole('cashier');
+    }
+
+    function isStaff() {
+      return isAdmin() || isBarista() || isCashier();
+    }
+
+    match /users/{userId} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow create, update, delete: if isAdmin();
+    }
+
     match /categories/{docId} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     match /products/{docId} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     match /variantGroups/{docId} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     match /settings/{docId} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /orders/{docId} {
+      allow read: if isStaff();
+      allow create: if isAdmin() || isBarista() || isCashier();
+      allow update, delete: if isAdmin();
+    }
+
+    match /orderCounters/{docId} {
+      allow read, create, update: if isAdmin() || isBarista() || isCashier();
+      allow delete: if false;
     }
   }
 }

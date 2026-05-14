@@ -1097,6 +1097,436 @@ button { cursor: pointer; }
   padding: 10px;
 }
 
+.barista-page {
+  min-height: 100vh;
+  width: min(980px, 100%);
+  margin: 0 auto;
+  padding: 18px 14px 300px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+.barista-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.barista-header span,
+.barista-cart-head span {
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.barista-header h1 {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.2rem;
+  line-height: 0.95;
+}
+.barista-live-total {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  color: var(--text-primary);
+  padding: 9px 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 10px 24px rgba(79, 52, 31, 0.06);
+  white-space: nowrap;
+}
+.barista-confirmation,
+.barista-error,
+.barista-sync,
+.barista-empty {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  padding: 12px 14px;
+}
+.barista-confirmation,
+.barista-sync {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.barista-confirmation {
+  border-color: color-mix(in srgb, #21825b 28%, var(--border));
+  color: #1f6b4e;
+}
+.barista-error {
+  border-color: rgba(190, 55, 55, 0.22);
+  color: #9f2f2f;
+}
+.barista-sync .lucide-loader-2,
+.barista-confirm .lucide-loader-2 {
+  animation: barista-spin 900ms linear infinite;
+}
+@keyframes barista-spin {
+  to { transform: rotate(360deg); }
+}
+.barista-categories {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(118px, 1fr);
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px 0 6px;
+  scrollbar-width: none;
+}
+.barista-categories::-webkit-scrollbar {
+  display: none;
+}
+.barista-category {
+  min-height: 72px;
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--border));
+  border-radius: 20px;
+  background: linear-gradient(180deg, var(--card), color-mix(in srgb, var(--surface) 88%, white));
+  color: var(--text-primary);
+  padding: 11px 13px;
+  font-weight: 800;
+  text-align: left;
+  box-shadow: 0 10px 22px rgba(79, 52, 31, 0.055);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.barista-category.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff8ef;
+}
+.barista-category:disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+}
+.barista-products {
+  display: grid;
+  gap: 10px;
+}
+.barista-product-card {
+  min-height: 86px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--card) 96%, transparent);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px;
+  gap: 11px;
+  align-items: center;
+  box-shadow: 0 10px 24px rgba(79, 52, 31, 0.055);
+}
+.barista-product-main {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+  text-align: left;
+}
+.barista-product-image {
+  width: 66px;
+  height: 66px;
+  border-radius: 15px;
+  background: var(--surface);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.barista-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: var(--product-shadow-card);
+}
+.barista-product-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.barista-product-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.98rem;
+}
+.barista-product-copy span {
+  color: var(--accent);
+  font-weight: 900;
+}
+.barista-product-copy small {
+  width: fit-content;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+.barista-add {
+  width: 58px;
+  height: 58px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--accent);
+  color: #fff8ef;
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+}
+.barista-add:active,
+.barista-category:active,
+.barista-confirm:active,
+.barista-clear:active,
+.barista-stepper button:active {
+  transform: scale(0.97);
+}
+.barista-note label {
+  color: var(--text-primary);
+}
+.barista-note textarea {
+  min-height: 78px;
+  border-color: var(--border);
+  background: var(--card);
+  color: var(--text-primary);
+}
+.barista-cart {
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 80;
+  max-width: 960px;
+  margin: 0 auto;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--card) 96%, transparent);
+  padding: 13px;
+  display: grid;
+  gap: 11px;
+  box-shadow: 0 22px 70px rgba(79, 52, 31, 0.2);
+  backdrop-filter: blur(18px);
+}
+.barista-cart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.barista-cart-head > div {
+  display: grid;
+  gap: 2px;
+}
+.barista-cart-head strong {
+  font-size: 1.55rem;
+  line-height: 1;
+}
+.barista-clear {
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-primary);
+  padding: 9px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 800;
+}
+.barista-clear:disabled,
+.barista-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.barista-cart-items {
+  max-height: 150px;
+  overflow-y: auto;
+  display: grid;
+  gap: 8px;
+  padding-right: 2px;
+}
+.barista-cart-item {
+  min-height: 54px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  padding: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+.barista-cart-item > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.barista-cart-item strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.barista-cart-item span {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+.barista-cart-item small {
+  color: var(--accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+.barista-options {
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+.barista-stepper {
+  display: grid;
+  grid-template-columns: 36px 32px 36px;
+  align-items: center;
+  gap: 5px;
+}
+.barista-stepper button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--text-primary);
+  display: grid;
+  place-items: center;
+}
+.barista-stepper strong {
+  text-align: center;
+}
+.barista-confirm {
+  min-height: 56px;
+  width: 100%;
+  border: 0;
+  border-radius: 18px;
+  background: var(--accent);
+  color: #fff8ef;
+  padding: 13px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-weight: 900;
+}
+.barista-modifier-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(0, 0, 0, 0.28);
+  display: grid;
+  align-items: end;
+  padding: 12px;
+}
+.barista-modifier-sheet {
+  width: min(620px, 100%);
+  margin: 0 auto;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: 24px;
+  background: var(--card);
+  color: var(--text-primary);
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+}
+.barista-modifier-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.barista-modifier-head span {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.barista-modifier-head h2 {
+  margin: 2px 0 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.65rem;
+  line-height: 1;
+}
+.barista-modifier-head button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: inherit;
+  display: grid;
+  place-items: center;
+}
+.barista-modifier-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.barista-modifier-chips button {
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-primary);
+  padding: 9px 12px;
+  font-weight: 850;
+}
+.barista-modifier-chips button.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff8ef;
+}
+.barista-item-note {
+  color: var(--text-primary);
+}
+.barista-item-note textarea {
+  min-height: 72px;
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+}
+.barista-modifier-actions {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 10px;
+}
+.barista-modifier-actions button {
+  min-height: 50px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-weight: 900;
+}
+.barista-modifier-actions button:last-child {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff8ef;
+}
+
 .admin-public-screen {
   min-height: 100vh;
   display: grid;
@@ -1241,6 +1671,10 @@ button { cursor: pointer; }
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.86rem;
+}
+.admin-session-card small {
+  color: #7a6658;
+  font-weight: 700;
 }
 .admin-content {
   padding: 26px;
@@ -1562,6 +1996,158 @@ textarea {
   color: #7a6658;
   text-align: center;
 }
+.orders-page {
+  max-width: 1380px;
+}
+.orders-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.order-card,
+.orders-history {
+  border: 1px solid rgba(90, 60, 40, 0.1);
+  border-radius: 22px;
+  background: #fffdfc;
+  padding: 18px;
+  box-shadow: 0 18px 50px rgba(79, 52, 31, 0.08);
+}
+.order-card {
+  display: grid;
+  gap: 14px;
+}
+.order-card--pendiente_pago {
+  border-color: rgba(184, 121, 52, 0.34);
+}
+.order-card--pagado,
+.order-card--en_preparacion {
+  border-color: rgba(28, 118, 83, 0.24);
+}
+.order-card--listo {
+  border-color: rgba(34, 112, 174, 0.26);
+}
+.order-card--cancelado {
+  opacity: 0.72;
+}
+.order-card-header,
+.order-card-meta,
+.order-item,
+.orders-history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.order-card-header h2 {
+  margin: 2px 0 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.45rem;
+  line-height: 0.95;
+}
+.order-card-header span,
+.order-status-stack small,
+.order-card-meta span,
+.order-item span,
+.orders-history-row span {
+  color: #7a6658;
+}
+.order-status-stack {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+}
+.order-status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: #f4ede7;
+  color: #1e1712;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+.order-card-meta {
+  border: 1px solid rgba(90, 60, 40, 0.1);
+  border-radius: 16px;
+  background: #fbf7f2;
+  padding: 12px;
+}
+.order-card-meta strong {
+  font-size: 1.35rem;
+}
+.order-items,
+.orders-history-list {
+  display: grid;
+  gap: 8px;
+}
+.order-item {
+  border-bottom: 1px solid rgba(90, 60, 40, 0.08);
+  padding-bottom: 8px;
+}
+.order-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.order-item > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.order-item strong,
+.order-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.order-item span:empty {
+  display: none;
+}
+.order-note {
+  margin: 0;
+  border-radius: 14px;
+  background: #fbf7f2;
+  color: #7a6658;
+  padding: 10px 12px;
+}
+.order-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.order-actions button {
+  min-height: 40px;
+  border: 1px solid rgba(90, 60, 40, 0.1);
+  border-radius: 999px;
+  background: #fbf7f2;
+  color: #1e1712;
+  padding: 9px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 850;
+}
+.order-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.orders-empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+.orders-history {
+  display: grid;
+  gap: 12px;
+}
+.orders-history-row {
+  border-radius: 14px;
+  background: #fbf7f2;
+  padding: 12px;
+}
 .compact-editor,
 .product-editor-form {
   border-color: rgba(184, 121, 52, 0.28);
@@ -1689,6 +2275,68 @@ textarea {
 }
 .admin-inline-sync span {
   background: #b87934;
+}
+
+@media (min-width: 700px) {
+  .barista-page {
+    padding: 24px 22px 320px;
+    gap: 18px;
+  }
+  .barista-header h1 {
+    font-size: 3rem;
+  }
+  .barista-categories {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-auto-flow: initial;
+    grid-auto-columns: initial;
+  }
+  .barista-category {
+    min-height: 92px;
+    padding: 16px;
+    font-size: 1.02rem;
+  }
+  .barista-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .barista-product-card {
+    min-height: 98px;
+    grid-template-columns: minmax(0, 1fr) 64px;
+    padding: 12px;
+  }
+  .barista-product-main {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+  .barista-product-image {
+    width: 76px;
+    height: 76px;
+  }
+  .barista-add {
+    width: 64px;
+    height: 64px;
+  }
+  .barista-note textarea {
+    min-height: 96px;
+  }
+  .barista-cart {
+    left: 22px;
+    right: 22px;
+    bottom: 18px;
+    padding: 16px;
+  }
+  .barista-cart-items {
+    max-height: 172px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .barista-cart-item {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .barista-options {
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
 }
 
 @media (max-width: 760px) {

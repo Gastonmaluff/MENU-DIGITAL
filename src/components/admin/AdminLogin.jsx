@@ -1,16 +1,45 @@
 import { Lock } from 'lucide-react';
 import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { getHomePathForRole } from '../../utils/roles';
 
 export default function AdminLogin() {
-  const { login, user, isReady } = useAuth();
+  const { login, logout, user, isReady, role, profile, profileError, profileLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from || getHomePathForRole(role);
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (user) return <Navigate to="/admin" replace />;
+  if (user && profileLoading) {
+    return (
+      <main className="admin-public-screen">
+        <div className="admin-login-card">
+          <span className="admin-login-icon"><Lock size={24} /></span>
+          <h1>Verificando permisos</h1>
+          <p>Estamos cargando tu perfil operativo.</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (user && (!profile || profile.active !== true || !role)) {
+    return (
+      <main className="admin-public-screen">
+        <div className="admin-login-card">
+          <span className="admin-login-icon"><Lock size={24} /></span>
+          <h1>Acceso pendiente</h1>
+          <p>Tu usuario necesita un perfil activo en Firestore para entrar al sistema.</p>
+          {profileError && <div className="admin-error">{profileError}</div>}
+          <button className="admin-secondary-button" type="button" onClick={logout}>Salir</button>
+        </div>
+      </main>
+    );
+  }
+
+  if (user) return <Navigate to={redirectTo} replace />;
 
   const submit = async (event) => {
     event.preventDefault();
@@ -18,7 +47,7 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       await login(form.email, form.password);
-      navigate('/admin');
+      navigate(redirectTo);
     } catch (err) {
       setError('No pudimos iniciar sesión. Revisá email y contraseña.');
       console.error(err);

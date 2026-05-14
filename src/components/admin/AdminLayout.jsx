@@ -2,6 +2,7 @@ import {
   Home,
   LogOut,
   Menu,
+  ReceiptText,
   SlidersHorizontal,
   SquarePen,
   X,
@@ -14,6 +15,7 @@ import { resolveAssetUrl } from '../../utils/assets';
 
 const links = [
   { to: '/admin', label: 'Dashboard', icon: Home, end: true },
+  { to: '/admin/orders', label: 'Pedidos', icon: ReceiptText },
   { to: '/admin/menu', label: 'Editar vista publica', icon: SquarePen },
   { to: '/admin/settings', label: 'Configuracion', icon: SlidersHorizontal },
 ];
@@ -27,7 +29,7 @@ function AdminBrand({ logoUrl }) {
 }
 
 export default function AdminLayout() {
-  const { logout, user } = useAuth();
+  const { logout, user, role } = useAuth();
   const { settings } = useSettings();
   const navigate = useNavigate();
   const [navOpen, setNavOpen] = useState(false);
@@ -73,6 +75,7 @@ export default function AdminLayout() {
         <div className="admin-session-card">
           <span>Sesion activa</span>
           <strong>{user?.email || 'Usuario admin'}</strong>
+          {role && <small>Rol: {role}</small>}
         </div>
       </aside>
       <section className="admin-content">
