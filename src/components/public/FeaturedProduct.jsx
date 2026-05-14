@@ -3,8 +3,9 @@ import { formatPrice } from '../../utils/format';
 import { getProductImageTuningStyle } from '../../utils/productImageTuning';
 import { getProductFeaturedImageUrl, getProductImageUrl } from '../../utils/productImages';
 import ProductImage from './ProductImage';
+import ProductOptionIcons from './ProductOptionIcons';
 
-export default function FeaturedProduct({ product, onOpen }) {
+export default function FeaturedProduct({ product, productOptions, variantGroups, onOpen }) {
   if (!product) return null;
 
   return (
@@ -24,6 +25,7 @@ export default function FeaturedProduct({ product, onOpen }) {
         <p className="featured-tags">{product.shortDescription}</p>
         <strong>{formatPrice(product.price)}</strong>
         <p>{product.description}</p>
+        <ProductOptionIcons product={product} productOptions={productOptions} variantGroups={variantGroups} size="featured" />
       </div>
       <div className="featured-visual">
         <ProductImage

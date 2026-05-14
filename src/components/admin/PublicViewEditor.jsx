@@ -1,4 +1,4 @@
-import {
+﻿import {
   CheckCircle2,
   Edit3,
   Eye,
@@ -11,11 +11,19 @@ import {
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useCategories } from '../../hooks/useCategories';
+import { useProductOptions } from '../../hooks/useProductOptions';
 import { useProducts } from '../../hooks/useProducts';
 import { categoryService } from '../../services/categoryService';
+import { productOptionService } from '../../services/productOptionService';
 import { productService } from '../../services/productService';
 import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 import { formatPrice, slugify } from '../../utils/format';
+import {
+  formatOptionPrice,
+  getProductOptionIds,
+  productOptionIconChoices,
+  productOptionIconMap,
+} from '../../utils/productOptions';
 import ImageUploader from './ImageUploader';
 import ProductThumbnail from './ProductThumbnail';
 
@@ -40,10 +48,7 @@ const emptyProduct = {
   active: true,
   featured: false,
   sortOrder: 1,
-  visualOptions: {
-    lactoseFree: false,
-    plantBased: false,
-  },
+  optionIds: [],
   suggestedProductIds: [],
   variantGroupIds: [],
   tags: [],
@@ -53,6 +58,7 @@ export default function PublicViewEditor() {
   const { user } = useAuth();
   const { items: categories, syncing: syncingCategories, error: categoriesError, reload: reloadCategories } = useCategories();
   const { items: products, syncing: syncingProducts, error: productsError, reload: reloadProducts } = useProducts();
+  const { items: productOptions, syncing: syncingProductOptions, error: productOptionsError, reload: reloadProductOptions } = useProductOptions();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -69,7 +75,7 @@ export default function PublicViewEditor() {
 
   const saveCategory = async (payload) => {
     if (!user) {
-      setFeedback('No tenés permisos para guardar. Iniciá sesión como administrador.');
+      setFeedback('No tenÃ©s permisos para guardar. IniciÃ¡ sesiÃ³n como administrador.');
       return;
     }
     setSaving(true);
@@ -83,10 +89,10 @@ export default function PublicViewEditor() {
       if (payload.id) await categoryService.update(payload.id, data);
       else await categoryService.create(data);
       setEditingCategory(null);
-      setFeedback('Categoría guardada.');
+      setFeedback('CategorÃ­a guardada.');
       await reloadCategories();
     } catch (err) {
-      console.error('Error guardando categoría', err);
+      console.error('Error guardando categorÃ­a', err);
       setFeedback(formatFirebaseWriteError(err));
     } finally {
       setSaving(false);
@@ -95,7 +101,7 @@ export default function PublicViewEditor() {
 
   const saveProduct = async (payload) => {
     if (!user) {
-      setFeedback('No tenés permisos para guardar. Iniciá sesión como administrador.');
+      setFeedback('No tenÃ©s permisos para guardar. IniciÃ¡ sesiÃ³n como administrador.');
       return;
     }
     setSaving(true);
@@ -111,7 +117,7 @@ export default function PublicViewEditor() {
       if (payload.id) await productService.update(payload.id, data);
       else await productService.create(data);
       setEditingProduct(null);
-      setFeedback('Producto guardado. La vista pública se actualizará automáticamente.');
+      setFeedback('Producto guardado. La vista pÃºblica se actualizarÃ¡ automÃ¡ticamente.');
       await reloadProducts();
     } catch (err) {
       console.error('Error guardando producto', err);
@@ -122,14 +128,14 @@ export default function PublicViewEditor() {
   };
 
   const removeCategory = async (category) => {
-    if (!confirm(`Eliminar categoría "${category.name}"?`)) return;
+    if (!confirm(`Eliminar categorÃ­a "${category.name}"?`)) return;
     setFeedback('');
     try {
       await categoryService.remove(category.id);
-      setFeedback('Categoría eliminada.');
+      setFeedback('CategorÃ­a eliminada.');
       await reloadCategories();
     } catch (err) {
-      console.error('Error eliminando categoría', err);
+      console.error('Error eliminando categorÃ­a', err);
       setFeedback(formatFirebaseWriteError(err));
     }
   };
@@ -164,26 +170,26 @@ export default function PublicViewEditor() {
       <div className="admin-page-header">
         <div>
           <span>Contenido</span>
-          <h1>Editar vista pública</h1>
+          <h1>Editar vista pÃºblica</h1>
         </div>
         <button
           className="admin-primary-button"
           type="button"
           onClick={() => setEditingCategory({ ...emptyCategory, sortOrder: categories.length + 1 })}
         >
-          <Plus size={18} /> Nueva categoría
+          <Plus size={18} /> Nueva categorÃ­a
         </button>
       </div>
 
-      {(syncingCategories || syncingProducts) && <div className="admin-inline-sync"><span /> Sincronizando contenido...</div>}
-      {(categoriesError || productsError) && <div className="admin-error">{categoriesError || productsError}</div>}
+      {(syncingCategories || syncingProducts || syncingProductOptions) && <div className="admin-inline-sync"><span /> Sincronizando contenido...</div>}
+      {(categoriesError || productsError || productOptionsError) && <div className="admin-error">{categoriesError || productsError || productOptionsError}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}
-      {!user && <div className="admin-error">No hay una sesión admin activa. Volvé a iniciar sesión para guardar cambios.</div>}
+      {!user && <div className="admin-error">No hay una sesiÃ³n admin activa. VolvÃ© a iniciar sesiÃ³n para guardar cambios.</div>}
 
       <div className="editor-layout">
         <aside className="editor-categories admin-panel">
           <div className="editor-panel-title">
-            <strong>Categorías</strong>
+            <strong>CategorÃ­as</strong>
             <span>{categories.length} en total</span>
           </div>
           <div className="editor-category-list">
@@ -206,7 +212,7 @@ export default function PublicViewEditor() {
           {activeCategory && (
             <div className="admin-panel editor-toolbar">
               <div>
-                <span>Categoría seleccionada</span>
+                <span>CategorÃ­a seleccionada</span>
                 <h2>{activeCategory.name}</h2>
               </div>
               <div className="admin-actions">
@@ -230,7 +236,7 @@ export default function PublicViewEditor() {
               <div className="editor-panel-title">
                 <div>
                   <strong>Productos de {activeCategory.name}</strong>
-                  <span>Editá imagen, precio, destacado y opciones visuales.</span>
+                  <span>EditÃ¡ imagen, precio, destacado y opciones visuales.</span>
                 </div>
                 <button
                   className="admin-primary-button"
@@ -253,7 +259,7 @@ export default function PublicViewEditor() {
                     <ProductThumbnail product={product} />
                     <div>
                       <strong>{product.name}</strong>
-                      <span>{product.shortDescription || 'Sin subtítulo'} · {formatPrice(product.price)}</span>
+                      <span>{product.shortDescription || 'Sin subtÃ­tulo'} Â· {formatPrice(product.price)}</span>
                     </div>
                     {product.featured && <span className="admin-mini-badge editor-badge"><Sparkles size={14} /> destacado</span>}
                     <div className="admin-actions">
@@ -263,7 +269,7 @@ export default function PublicViewEditor() {
                   </article>
                 ))}
                 {categoryProducts.length === 0 && (
-                  <div className="admin-empty-inline">Todavía no hay productos en esta categoría.</div>
+                  <div className="admin-empty-inline">TodavÃ­a no hay productos en esta categorÃ­a.</div>
                 )}
               </div>
             </div>
@@ -273,8 +279,10 @@ export default function PublicViewEditor() {
             <div id="product-form" ref={productFormRef} className="product-form-anchor">
               <ProductEditor
                 product={editingProduct}
+                productOptions={productOptions}
                 saving={saving}
                 nameInputRef={productNameInputRef}
+                onOptionsReload={reloadProductOptions}
                 onCancel={() => setEditingProduct(null)}
                 onSave={saveProduct}
               />
@@ -297,7 +305,7 @@ function CategoryEditor({ category, saving, onCancel, onSave }) {
   return (
     <form className="admin-panel admin-form compact-editor" onSubmit={submit}>
       <div className="editor-panel-title">
-        <strong>{form.id ? 'Editar categoría' : 'Nueva categoría'}</strong>
+        <strong>{form.id ? 'Editar categorÃ­a' : 'Nueva categorÃ­a'}</strong>
       </div>
       <div className="form-grid">
         <label>Nombre<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /></label>
@@ -309,24 +317,21 @@ function CategoryEditor({ category, saving, onCancel, onSave }) {
         </label>
         <label>Slug<input value={form.slug || slugify(form.name)} onChange={(event) => setForm({ ...form, slug: event.target.value })} /></label>
       </div>
-      <label className="admin-checkbox"><input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} /> Visible en el menú</label>
+      <label className="admin-checkbox"><input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} /> Visible en el menÃº</label>
       <div className="admin-form-actions">
         <button className="admin-secondary-button" type="button" onClick={onCancel}>Cancelar</button>
-        <button className="admin-primary-button" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar categoría'}</button>
+        <button className="admin-primary-button" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar categorÃ­a'}</button>
       </div>
     </form>
   );
 }
 
-function ProductEditor({ product, saving, nameInputRef, onCancel, onSave }) {
+function ProductEditor({ product, productOptions, saving, nameInputRef, onOptionsReload, onCancel, onSave }) {
   const [pendingUploads, setPendingUploads] = useState(0);
   const [imageUploadError, setImageUploadError] = useState('');
   const [form, setForm] = useState({
     ...product,
-    visualOptions: {
-      lactoseFree: Boolean(product.visualOptions?.lactoseFree || product.optionFlags?.deslactosado),
-      plantBased: Boolean(product.visualOptions?.plantBased || product.optionFlags?.vegetal),
-    },
+    optionIds: getProductOptionIds(product),
   });
 
   const submit = (event) => {
@@ -344,13 +349,11 @@ function ProductEditor({ product, saving, nameInputRef, onCancel, onSave }) {
     setForm({ ...form, [field]: url });
   };
 
-  const setVisualOption = (key, value) => {
+  const toggleOption = (id) => {
+    const optionIds = form.optionIds || [];
     setForm({
       ...form,
-      visualOptions: {
-        ...form.visualOptions,
-        [key]: value,
-      },
+      optionIds: optionIds.includes(id) ? optionIds.filter((optionId) => optionId !== id) : [...optionIds, id],
     });
   };
 
@@ -359,16 +362,16 @@ function ProductEditor({ product, saving, nameInputRef, onCancel, onSave }) {
       <div className="editor-panel-title">
         <div>
           <strong>{form.id ? `Editar ${form.name}` : 'Nuevo producto'}</strong>
-          <span>Estos datos se reflejan en la vista pública.</span>
+          <span>Estos datos se reflejan en la vista pÃºblica.</span>
         </div>
       </div>
       <div className="form-grid">
         <label>Nombre<input ref={nameInputRef} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /></label>
         <label>Precio<input type="number" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} /></label>
         <label>Orden<input type="number" value={form.sortOrder} onChange={(event) => setForm({ ...form, sortOrder: event.target.value })} /></label>
-        <label>Subtítulo<input value={form.shortDescription} onChange={(event) => setForm({ ...form, shortDescription: event.target.value })} /></label>
+        <label>SubtÃ­tulo<input value={form.shortDescription} onChange={(event) => setForm({ ...form, shortDescription: event.target.value })} /></label>
       </div>
-      <label>Descripción<textarea value={form.description || ''} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
+      <label>DescripciÃ³n<textarea value={form.description || ''} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
       <div className="form-grid">
         <ImageUploader
           label="Imagen principal PNG/JPG"
@@ -386,14 +389,13 @@ function ProductEditor({ product, saving, nameInputRef, onCancel, onSave }) {
         />
       </div>
       {imageUploadError && <small className="admin-error-text">{imageUploadError}</small>}
-      <section className="editor-options-box">
-        <div>
-          <strong>Opciones visuales</strong>
-          <span>Se muestran como íconos discretos en el menú público.</span>
-        </div>
-        <label className="admin-checkbox"><input type="checkbox" checked={form.visualOptions.lactoseFree} onChange={(event) => setVisualOption('lactoseFree', event.target.checked)} /> Deslactosado</label>
-        <label className="admin-checkbox"><input type="checkbox" checked={form.visualOptions.plantBased} onChange={(event) => setVisualOption('plantBased', event.target.checked)} /> Vegetal</label>
-      </section>
+      <ProductOptionsEditor
+        selectedOptionIds={form.optionIds || []}
+        productOptions={productOptions}
+        onToggle={toggleOption}
+        onCreated={(id) => setForm((current) => ({ ...current, optionIds: [...new Set([...(current.optionIds || []), id])] }))}
+        onOptionsReload={onOptionsReload}
+      />
       <div className="admin-switch-row">
         <label className="admin-checkbox"><input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} /> Visible</label>
         <label className="admin-checkbox"><input type="checkbox" checked={form.featured} onChange={(event) => setForm({ ...form, featured: event.target.checked })} /> Producto destacado</label>
@@ -405,5 +407,221 @@ function ProductEditor({ product, saving, nameInputRef, onCancel, onSave }) {
         </button>
       </div>
     </form>
+  );
+}
+
+function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onCreated, onOptionsReload }) {
+  const [creating, setCreating] = useState(false);
+  const [savingOption, setSavingOption] = useState(false);
+  const [optionError, setOptionError] = useState('');
+  const [editingOption, setEditingOption] = useState(null);
+  const [newOption, setNewOption] = useState({
+    nombre: '',
+    precioExtra: 0,
+    icono: '',
+    enabled: true,
+  });
+
+  const saveOption = async (event) => {
+    event.preventDefault();
+    if (!newOption.nombre.trim()) return;
+
+    setSavingOption(true);
+    setOptionError('');
+    try {
+      const id = await productOptionService.create({
+        ...newOption,
+        sortOrder: productOptions.length + 1,
+      });
+      await onOptionsReload();
+      onCreated(id);
+      setNewOption({ nombre: '', precioExtra: 0, icono: '', enabled: true });
+      setCreating(false);
+    } catch (err) {
+      console.error('Error guardando opcion', err);
+      setOptionError(formatFirebaseWriteError(err));
+    } finally {
+      setSavingOption(false);
+    }
+  };
+
+  const saveExistingOption = async (event) => {
+    event.preventDefault();
+    if (!editingOption?.nombre?.trim()) return;
+
+    setSavingOption(true);
+    setOptionError('');
+    try {
+      await productOptionService.update(editingOption.id, editingOption);
+      await onOptionsReload();
+      setEditingOption(null);
+    } catch (err) {
+      console.error('Error actualizando opcion', err);
+      setOptionError(formatFirebaseWriteError(err));
+    } finally {
+      setSavingOption(false);
+    }
+  };
+
+  const removeOption = async (option) => {
+    if (!confirm(`Eliminar opción "${option.nombre}"?`)) return;
+
+    setSavingOption(true);
+    setOptionError('');
+    try {
+      await productOptionService.remove(option.id);
+      await onOptionsReload();
+    } catch (err) {
+      console.error('Error eliminando opcion', err);
+      setOptionError(formatFirebaseWriteError(err));
+    } finally {
+      setSavingOption(false);
+    }
+  };
+
+  return (
+    <section className="editor-options-box product-options-manager">
+      <div className="editor-panel-title">
+        <div>
+          <strong>Opciones / adicionales</strong>
+          <span>Activá las opciones que aplican a este producto. El precio base no cambia.</span>
+        </div>
+        <button className="admin-secondary-button" type="button" onClick={() => setCreating((value) => !value)}>
+          <Plus size={17} /> Nueva opción
+        </button>
+      </div>
+
+      <div className="product-option-list">
+        {productOptions.map((option) => {
+          const Icon = productOptionIconMap[option.icono];
+          const extra = formatOptionPrice(option.precioExtra);
+
+          return (
+            <article className={`product-option-select ${!option.enabled ? 'is-disabled' : ''}`} key={option.id}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={selectedOptionIds.includes(option.id)}
+                  onChange={() => onToggle(option.id)}
+                  disabled={!option.enabled}
+                />
+                <span className="product-option-select-icon">{Icon && <Icon size={16} />}</span>
+                <span>
+                  <strong>{option.nombre}</strong>
+                  <small>{option.enabled ? 'Disponible' : 'Oculta'}</small>
+                </span>
+              </label>
+              {extra && <b>{extra}</b>}
+              <div className="product-option-actions">
+                <button type="button" onClick={() => setEditingOption(option)} aria-label={`Editar ${option.nombre}`}>
+                  <Edit3 size={15} />
+                </button>
+                <button type="button" onClick={() => removeOption(option)} aria-label={`Eliminar ${option.nombre}`}>
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            </article>
+          );
+        })}
+        {productOptions.length === 0 && (
+          <div className="admin-empty-inline">Todavía no hay opciones. Creá la primera para asignarla al producto.</div>
+        )}
+      </div>
+
+      {editingOption && (
+        <form className="product-option-create" onSubmit={saveExistingOption}>
+          <div className="form-grid">
+            <label>
+              Nombre de la opción
+              <input
+                value={editingOption.nombre}
+                onChange={(event) => setEditingOption({ ...editingOption, nombre: event.target.value })}
+                required
+              />
+            </label>
+            <label>
+              Precio adicional
+              <input
+                type="number"
+                min="0"
+                value={editingOption.precioExtra}
+                onChange={(event) => setEditingOption({ ...editingOption, precioExtra: event.target.value })}
+              />
+            </label>
+            <label>
+              Icono
+              <select value={editingOption.icono} onChange={(event) => setEditingOption({ ...editingOption, icono: event.target.value })}>
+                {productOptionIconChoices.map((choice) => (
+                  <option key={choice.value} value={choice.value}>{choice.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="admin-checkbox">
+              <input
+                type="checkbox"
+                checked={editingOption.enabled}
+                onChange={(event) => setEditingOption({ ...editingOption, enabled: event.target.checked })}
+              />
+              Visible
+            </label>
+          </div>
+          {optionError && <small className="admin-error-text">{optionError}</small>}
+          <div className="admin-form-actions">
+            <button className="admin-secondary-button" type="button" onClick={() => setEditingOption(null)}>Cancelar</button>
+            <button className="admin-primary-button" type="submit" disabled={savingOption}>
+              {savingOption ? 'Guardando...' : 'Guardar cambios'}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {creating && (
+        <form className="product-option-create" onSubmit={saveOption}>
+          <div className="form-grid">
+            <label>
+              Nombre de la opción
+              <input
+                value={newOption.nombre}
+                onChange={(event) => setNewOption({ ...newOption, nombre: event.target.value })}
+                placeholder="Leche vegetal"
+                required
+              />
+            </label>
+            <label>
+              Precio adicional
+              <input
+                type="number"
+                min="0"
+                value={newOption.precioExtra}
+                onChange={(event) => setNewOption({ ...newOption, precioExtra: event.target.value })}
+              />
+            </label>
+            <label>
+              Icono
+              <select value={newOption.icono} onChange={(event) => setNewOption({ ...newOption, icono: event.target.value })}>
+                {productOptionIconChoices.map((choice) => (
+                  <option key={choice.value} value={choice.value}>{choice.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="admin-checkbox">
+              <input
+                type="checkbox"
+                checked={newOption.enabled}
+                onChange={(event) => setNewOption({ ...newOption, enabled: event.target.checked })}
+              />
+              Visible
+            </label>
+          </div>
+          {optionError && <small className="admin-error-text">{optionError}</small>}
+          <div className="admin-form-actions">
+            <button className="admin-secondary-button" type="button" onClick={() => setCreating(false)}>Cancelar</button>
+            <button className="admin-primary-button" type="submit" disabled={savingOption}>
+              {savingOption ? 'Guardando...' : 'Guardar opción'}
+            </button>
+          </div>
+        </form>
+      )}
+    </section>
   );
 }

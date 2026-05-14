@@ -3,6 +3,7 @@ import ProductCard from './ProductCard';
 
 export default function ProductGrid({
   products,
+  productOptions,
   variantGroups,
   visibleCount,
   onOpen,
@@ -41,6 +42,7 @@ export default function ProductGrid({
         <ProductCard
           key={product.id}
           product={product}
+          productOptions={productOptions}
           variantGroups={variantGroups}
           onOpen={onOpen}
         />

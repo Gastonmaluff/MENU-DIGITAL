@@ -1,5 +1,6 @@
 import { createDocument, deleteDocument, listCollection, updateDocument } from './firestoreService';
 import { getProductFeaturedImageUrl, getProductImageUrl } from '../utils/productImages';
+import { getLegacyOptionIds } from '../utils/productOptions';
 
 const cleanArray = (value) => {
   if (Array.isArray(value)) return value.filter(Boolean);
@@ -23,9 +24,12 @@ const imageFieldAliases = [
   'heroImage',
   'coverImageUrl',
 ];
+const legacyOptionFieldAliases = ['visualOptions', 'optionFlags'];
 
 const stripImageAliases = (payload) =>
-  Object.fromEntries(Object.entries(payload).filter(([key]) => !imageFieldAliases.includes(key)));
+  Object.fromEntries(
+    Object.entries(payload).filter(([key]) => ![...imageFieldAliases, ...legacyOptionFieldAliases].includes(key)),
+  );
 
 export const normalizeProductPayload = (payload) => {
   const rest = stripImageAliases(payload);
@@ -39,12 +43,9 @@ export const normalizeProductPayload = (payload) => {
     tags: cleanArray(payload.tags),
     variantGroupIds: cleanArray(payload.variantGroupIds),
     suggestedProductIds: cleanArray(payload.suggestedProductIds),
+    optionIds: [...new Set([...cleanArray(payload.optionIds), ...getLegacyOptionIds(payload)])],
     active: payload.active ?? true,
     featured: payload.featured ?? false,
-    visualOptions: {
-      lactoseFree: Boolean(payload.visualOptions?.lactoseFree),
-      plantBased: Boolean(payload.visualOptions?.plantBased),
-    },
   };
 };
 

@@ -45,6 +45,33 @@ export const demoVariantGroups = [
   },
 ];
 
+export const demoProductOptions = [
+  {
+    id: 'leche-vegetal',
+    nombre: 'Leche vegetal',
+    precioExtra: 2000,
+    icono: 'leaf',
+    enabled: true,
+    sortOrder: 1,
+  },
+  {
+    id: 'deslactosada',
+    nombre: 'Deslactosada',
+    precioExtra: 0,
+    icono: 'milkOff',
+    enabled: true,
+    sortOrder: 2,
+  },
+  {
+    id: 'extra-shot',
+    nombre: 'Extra shot',
+    precioExtra: 5000,
+    icono: 'coffee',
+    enabled: true,
+    sortOrder: 3,
+  },
+];
+
 const cup = `${import.meta.env.BASE_URL}assets/cappuccino.png`;
 
 export const demoProducts = [

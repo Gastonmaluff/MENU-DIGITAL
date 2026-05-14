@@ -4,7 +4,7 @@ import { getProductImageUrl } from '../../utils/productImages';
 import ProductImage from './ProductImage';
 import ProductOptionIcons from './ProductOptionIcons';
 
-export default function ProductCard({ product, variantGroups, onOpen }) {
+export default function ProductCard({ product, productOptions, variantGroups, onOpen }) {
   return (
     <button
       className="product-card floating-product"
@@ -20,7 +20,7 @@ export default function ProductCard({ product, variantGroups, onOpen }) {
           <h3>{product.name}</h3>
           <p>{product.shortDescription || product.description}</p>
         </div>
-        <ProductOptionIcons product={product} variantGroups={variantGroups} />
+        <ProductOptionIcons product={product} productOptions={productOptions} variantGroups={variantGroups} />
       </div>
       <div className="product-card-footer">
         <strong>{formatPrice(product.price)}</strong>

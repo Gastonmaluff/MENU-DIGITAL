@@ -940,6 +940,12 @@ button { cursor: pointer; }
   font: inherit;
   white-space: nowrap;
 }
+.product-option-icons em {
+  color: var(--text-secondary);
+  font-style: normal;
+  font-weight: 800;
+  white-space: nowrap;
+}
 .product-option-icons--modal span {
   min-height: 34px;
   padding: 7px 11px;
@@ -2173,6 +2179,76 @@ textarea {
 .settings-section span {
   color: #7a6658;
   font-size: 0.88rem;
+}
+.product-options-manager .editor-panel-title {
+  margin-bottom: 0;
+}
+.product-option-list {
+  display: grid;
+  gap: 8px;
+}
+.product-option-select {
+  border: 1px solid rgba(90, 60, 40, 0.1);
+  border-radius: 16px;
+  background: #fffdfc;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+.product-option-select.is-disabled {
+  opacity: 0.58;
+}
+.product-option-select label {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+}
+.product-option-select input {
+  width: auto;
+}
+.product-option-select-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fbf7f2;
+  color: #b87934;
+  display: grid;
+  place-items: center;
+}
+.product-option-select strong,
+.product-option-select small {
+  display: block;
+}
+.product-option-select b {
+  color: #b87934;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.product-option-actions {
+  display: flex;
+  gap: 6px;
+}
+.product-option-actions button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(90, 60, 40, 0.1);
+  border-radius: 50%;
+  background: #fbf7f2;
+  color: #1e1712;
+  display: grid;
+  place-items: center;
+}
+.product-option-create {
+  border: 1px solid rgba(184, 121, 52, 0.22);
+  border-radius: 16px;
+  background: #fffdfc;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
 }
 .settings-simple {
   width: min(680px, 100%);

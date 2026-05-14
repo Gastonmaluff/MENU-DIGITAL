@@ -5,7 +5,7 @@ import ProductImage from './ProductImage';
 import ProductOptionIcons from './ProductOptionIcons';
 import SuggestedProducts from './SuggestedProducts';
 
-export default function ProductDetailModal({ product, products, variantGroups, onClose }) {
+export default function ProductDetailModal({ product, products, productOptions, variantGroups, onClose }) {
   if (!product) return null;
 
   return (
@@ -21,7 +21,7 @@ export default function ProductDetailModal({ product, products, variantGroups, o
             <h3>{product.name}</h3>
             <strong>{formatPrice(product.price)}</strong>
             <p>{product.description || product.shortDescription}</p>
-            <ProductOptionIcons product={product} variantGroups={variantGroups} size="modal" />
+            <ProductOptionIcons product={product} productOptions={productOptions} variantGroups={variantGroups} size="modal" />
           </div>
         </div>
         <SuggestedProducts product={product} products={products} />

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCategories } from '../../hooks/useCategories';
+import { useProductOptions } from '../../hooks/useProductOptions';
 import { useProducts } from '../../hooks/useProducts';
 import { useSettings } from '../../hooks/useSettings';
 import { useVariantGroups } from '../../hooks/useVariantGroups';
@@ -68,6 +69,7 @@ export default function PublicMenu() {
   const { settings, syncing: syncingSettings, error: settingsError } = useSettings();
   const { items: categories, syncing: syncingCategories, error: categoriesError, usingDemo: usingDemoCategories } = useCategories();
   const { items: products, syncing: syncingProducts, error: productsError, usingDemo: usingDemoProducts } = useProducts();
+  const { items: productOptions, syncing: syncingProductOptions } = useProductOptions();
   const { items: variantGroups, syncing: syncingVariants, usingDemo: usingDemoVariants } = useVariantGroups();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -109,6 +111,7 @@ export default function PublicMenu() {
     () => (usingDemoVariants ? [] : variantGroups),
     [usingDemoVariants, variantGroups],
   );
+  const publicProductOptions = useMemo(() => productOptions, [productOptions]);
   const activeCategories = useMemo(() => publicCategories.filter((category) => category.active), [publicCategories]);
   const currentCategoryId = activeCategories.some((category) => category.id === activeCategoryId)
     ? activeCategoryId
@@ -139,7 +142,7 @@ export default function PublicMenu() {
   }, [activeCategories, activeProducts]);
   const contentViewMode = moreCategoryId === contentCategoryId ? 'more' : 'main';
   const content = getCategoryContent(contentCategoryId, contentViewMode);
-  const firebaseReady = !syncingSettings && !syncingCategories && !syncingProducts && !syncingVariants;
+  const firebaseReady = !syncingSettings && !syncingCategories && !syncingProducts && !syncingVariants && !syncingProductOptions;
   const firebaseError = settingsError || categoriesError || productsError;
   const getVisibleCategoryImageUrls = useCallback((categoryId, viewMode = 'main') => {
     const categoryContent = getCategoryContent(categoryId, viewMode);
@@ -321,10 +324,18 @@ export default function PublicMenu() {
 
   const renderCategoryContent = ({ isMoreView, featuredProduct, gridProducts, visibleCount, hasMore }) => (
     <div className={`category-view ${isMoreView ? 'category-view--more' : ''}`}>
-      {!isMoreView && <FeaturedProduct product={featuredProduct} onOpen={setSelectedProduct} />}
+      {!isMoreView && (
+        <FeaturedProduct
+          product={featuredProduct}
+          productOptions={publicProductOptions}
+          variantGroups={publicVariantGroups}
+          onOpen={setSelectedProduct}
+        />
+      )}
       {(gridProducts.length > 0 || !featuredProduct || isMoreView) && (
         <ProductGrid
           products={gridProducts}
+          productOptions={publicProductOptions}
           variantGroups={publicVariantGroups}
           visibleCount={visibleCount}
           onOpen={setSelectedProduct}
@@ -389,6 +400,7 @@ export default function PublicMenu() {
             <ProductDetailModal
               product={selectedProduct}
               products={activeProducts}
+              productOptions={publicProductOptions}
               variantGroups={publicVariantGroups}
               onClose={() => setSelectedProduct(null)}
             />
