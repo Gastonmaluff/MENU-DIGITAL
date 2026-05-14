@@ -75,7 +75,7 @@ export default function PublicViewEditor() {
 
   const saveCategory = async (payload) => {
     if (!user) {
-      setFeedback('No tenÃ©s permisos para guardar. IniciÃ¡ sesiÃ³n como administrador.');
+      setFeedback('No tenés permisos para guardar. Iniciá sesión como administrador.');
       return;
     }
     setSaving(true);
@@ -89,10 +89,10 @@ export default function PublicViewEditor() {
       if (payload.id) await categoryService.update(payload.id, data);
       else await categoryService.create(data);
       setEditingCategory(null);
-      setFeedback('CategorÃ­a guardada.');
+      setFeedback('Categoría guardada.');
       await reloadCategories();
     } catch (err) {
-      console.error('Error guardando categorÃ­a', err);
+      console.error('Error guardando categoría', err);
       setFeedback(formatFirebaseWriteError(err));
     } finally {
       setSaving(false);
@@ -101,7 +101,7 @@ export default function PublicViewEditor() {
 
   const saveProduct = async (payload) => {
     if (!user) {
-      setFeedback('No tenÃ©s permisos para guardar. IniciÃ¡ sesiÃ³n como administrador.');
+      setFeedback('No tenés permisos para guardar. Iniciá sesión como administrador.');
       return;
     }
     setSaving(true);
@@ -117,7 +117,7 @@ export default function PublicViewEditor() {
       if (payload.id) await productService.update(payload.id, data);
       else await productService.create(data);
       setEditingProduct(null);
-      setFeedback('Producto guardado. La vista pÃºblica se actualizarÃ¡ automÃ¡ticamente.');
+      setFeedback('Producto guardado. La vista pública se actualizará automáticamente.');
       await reloadProducts();
     } catch (err) {
       console.error('Error guardando producto', err);
@@ -128,14 +128,14 @@ export default function PublicViewEditor() {
   };
 
   const removeCategory = async (category) => {
-    if (!confirm(`Eliminar categorÃ­a "${category.name}"?`)) return;
+    if (!confirm(`Eliminar categoría "${category.name}"?`)) return;
     setFeedback('');
     try {
       await categoryService.remove(category.id);
-      setFeedback('CategorÃ­a eliminada.');
+      setFeedback('Categoría eliminada.');
       await reloadCategories();
     } catch (err) {
-      console.error('Error eliminando categorÃ­a', err);
+      console.error('Error eliminando categoría', err);
       setFeedback(formatFirebaseWriteError(err));
     }
   };
@@ -170,26 +170,26 @@ export default function PublicViewEditor() {
       <div className="admin-page-header">
         <div>
           <span>Contenido</span>
-          <h1>Editar vista pÃºblica</h1>
+          <h1>Editar vista pública</h1>
         </div>
         <button
           className="admin-primary-button"
           type="button"
           onClick={() => setEditingCategory({ ...emptyCategory, sortOrder: categories.length + 1 })}
         >
-          <Plus size={18} /> Nueva categorÃ­a
+          <Plus size={18} /> Nueva categoría
         </button>
       </div>
 
       {(syncingCategories || syncingProducts || syncingProductOptions) && <div className="admin-inline-sync"><span /> Sincronizando contenido...</div>}
       {(categoriesError || productsError || productOptionsError) && <div className="admin-error">{categoriesError || productsError || productOptionsError}</div>}
       {feedback && <div className="admin-feedback">{feedback}</div>}
-      {!user && <div className="admin-error">No hay una sesiÃ³n admin activa. VolvÃ© a iniciar sesiÃ³n para guardar cambios.</div>}
+      {!user && <div className="admin-error">No hay una sesión admin activa. Volvé a iniciar sesión para guardar cambios.</div>}
 
       <div className="editor-layout">
         <aside className="editor-categories admin-panel">
           <div className="editor-panel-title">
-            <strong>CategorÃ­as</strong>
+            <strong>Categorías</strong>
             <span>{categories.length} en total</span>
           </div>
           <div className="editor-category-list">
@@ -212,7 +212,7 @@ export default function PublicViewEditor() {
           {activeCategory && (
             <div className="admin-panel editor-toolbar">
               <div>
-                <span>CategorÃ­a seleccionada</span>
+                <span>Categoría seleccionada</span>
                 <h2>{activeCategory.name}</h2>
               </div>
               <div className="admin-actions">
@@ -236,7 +236,7 @@ export default function PublicViewEditor() {
               <div className="editor-panel-title">
                 <div>
                   <strong>Productos de {activeCategory.name}</strong>
-                  <span>EditÃ¡ imagen, precio, destacado y opciones visuales.</span>
+                  <span>Editá imagen, precio, destacado y opciones / adicionales.</span>
                 </div>
                 <button
                   className="admin-primary-button"
@@ -259,7 +259,7 @@ export default function PublicViewEditor() {
                     <ProductThumbnail product={product} />
                     <div>
                       <strong>{product.name}</strong>
-                      <span>{product.shortDescription || 'Sin subtÃ­tulo'} Â· {formatPrice(product.price)}</span>
+                      <span>{product.shortDescription || 'Sin subtítulo'} · {formatPrice(product.price)}</span>
                     </div>
                     {product.featured && <span className="admin-mini-badge editor-badge"><Sparkles size={14} /> destacado</span>}
                     <div className="admin-actions">
@@ -269,7 +269,7 @@ export default function PublicViewEditor() {
                   </article>
                 ))}
                 {categoryProducts.length === 0 && (
-                  <div className="admin-empty-inline">TodavÃ­a no hay productos en esta categorÃ­a.</div>
+                  <div className="admin-empty-inline">Todavía no hay productos en esta categoría.</div>
                 )}
               </div>
             </div>
@@ -305,7 +305,7 @@ function CategoryEditor({ category, saving, onCancel, onSave }) {
   return (
     <form className="admin-panel admin-form compact-editor" onSubmit={submit}>
       <div className="editor-panel-title">
-        <strong>{form.id ? 'Editar categorÃ­a' : 'Nueva categorÃ­a'}</strong>
+        <strong>{form.id ? 'Editar categoría' : 'Nueva categoría'}</strong>
       </div>
       <div className="form-grid">
         <label>Nombre<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /></label>
@@ -317,10 +317,10 @@ function CategoryEditor({ category, saving, onCancel, onSave }) {
         </label>
         <label>Slug<input value={form.slug || slugify(form.name)} onChange={(event) => setForm({ ...form, slug: event.target.value })} /></label>
       </div>
-      <label className="admin-checkbox"><input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} /> Visible en el menÃº</label>
+      <label className="admin-checkbox"><input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} /> Visible en el menú</label>
       <div className="admin-form-actions">
         <button className="admin-secondary-button" type="button" onClick={onCancel}>Cancelar</button>
-        <button className="admin-primary-button" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar categorÃ­a'}</button>
+        <button className="admin-primary-button" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar categoría'}</button>
       </div>
     </form>
   );
@@ -362,16 +362,16 @@ function ProductEditor({ product, productOptions, saving, nameInputRef, onOption
       <div className="editor-panel-title">
         <div>
           <strong>{form.id ? `Editar ${form.name}` : 'Nuevo producto'}</strong>
-          <span>Estos datos se reflejan en la vista pÃºblica.</span>
+          <span>Estos datos se reflejan en la vista pública.</span>
         </div>
       </div>
       <div className="form-grid">
         <label>Nombre<input ref={nameInputRef} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /></label>
         <label>Precio<input type="number" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} /></label>
         <label>Orden<input type="number" value={form.sortOrder} onChange={(event) => setForm({ ...form, sortOrder: event.target.value })} /></label>
-        <label>SubtÃ­tulo<input value={form.shortDescription} onChange={(event) => setForm({ ...form, shortDescription: event.target.value })} /></label>
+        <label>Subtítulo<input value={form.shortDescription} onChange={(event) => setForm({ ...form, shortDescription: event.target.value })} /></label>
       </div>
-      <label>DescripciÃ³n<textarea value={form.description || ''} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
+      <label>Descripción<textarea value={form.description || ''} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
       <div className="form-grid">
         <ImageUploader
           label="Imagen principal PNG/JPG"
