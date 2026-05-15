@@ -108,6 +108,8 @@ export const normalizeOrderPayload = (payload = {}) => {
 
   return {
     orderNumber: payload.orderNumber || '',
+    customerName: String(payload.customerName || payload.orderName || '').trim(),
+    takeAway: Boolean(payload.takeAway),
     status,
     items,
     total,
@@ -132,6 +134,11 @@ const normalizeOrderUpdatePayload = (payload = {}) => {
   if ('status' in update) update.status = normalizeStatus(update.status, null);
   if ('paymentStatus' in update) update.paymentStatus = normalizePaymentStatus(update.paymentStatus, null);
   if ('paymentMethod' in update) update.paymentMethod = normalizePaymentMethod(update.paymentMethod);
+  if ('customerName' in update || 'orderName' in update) {
+    update.customerName = String(update.customerName || update.orderName || '').trim();
+    delete update.orderName;
+  }
+  if ('takeAway' in update) update.takeAway = Boolean(update.takeAway);
 
   return update;
 };

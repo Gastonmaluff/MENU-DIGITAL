@@ -105,7 +105,11 @@ export default function OrderList() {
           <div className="orders-history-list">
             {closedOrders.slice(0, 8).map((order) => (
               <article className="orders-history-row" key={order.id}>
-                <strong>#{order.orderNumber}</strong>
+                <strong>
+                  #{order.orderNumber}
+                  {order.customerName || order.orderName ? ` · ${order.customerName || order.orderName}` : ''}
+                  {order.takeAway ? ' · Para llevar' : ''}
+                </strong>
                 <span>{statusLabels[order.status] || order.status}</span>
                 <b>{formatPrice(order.total)}</b>
               </article>
@@ -120,19 +124,22 @@ export default function OrderList() {
 function OrderCard({ order, updatingId, onUpdateStatus }) {
   const isUpdating = updatingId === order.id;
   const itemCount = (order.items || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const customerName = String(order.customerName || order.orderName || '').trim();
 
   return (
     <article className={`order-card order-card--${order.status || 'sin_estado'}`}>
       <header className="order-card-header">
         <div>
           <span>{formatDateTime(order.createdAt)}</span>
-          <h2>#{order.orderNumber || '---'}</h2>
+          <h2>#{order.orderNumber || '---'}{customerName ? ` · ${customerName}` : ''}</h2>
         </div>
         <div className="order-status-stack">
           <span className="order-status-badge">{statusLabels[order.status] || order.status}</span>
           <small>{order.paymentStatus === 'pagado' ? 'Pago confirmado' : 'Pago pendiente'}</small>
         </div>
       </header>
+
+      {order.takeAway && <span className="order-takeaway-badge">Para llevar</span>}
 
       <div className="order-card-meta">
         <span>{itemCount} productos</span>

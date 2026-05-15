@@ -6,6 +6,7 @@ import { useSettings } from '../../hooks/useSettings';
 import { orderService } from '../../services/orderService';
 import { resolveAssetUrl } from '../../utils/assets';
 import { formatPrice } from '../../utils/format';
+import { buildOrderWhatsAppUrl, normalizeWhatsAppNumber } from '../../utils/orderWhatsApp';
 import { getProductImageUrl } from '../../utils/productImages';
 import ThemeWrapper from '../public/ThemeWrapper';
 
@@ -60,12 +61,14 @@ const createCartItem = ({ product, category, cartKey, modifiers = [], note = '',
 });
 
 export default function BaristaPanel() {
-  const { settings } = useSettings();
+  const { settings, syncing: syncingSettings } = useSettings();
   const { items: categories, syncing: syncingCategories, error: categoriesError } = useCategories();
   const { items: products, syncing: syncingProducts, error: productsError } = useProducts();
   const [activeCategoryKey, setActiveCategoryKey] = useState(CATEGORY_TARGETS[0].key);
   const [cartItems, setCartItems] = useState([]);
   const [orderNote, setOrderNote] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [takeAway, setTakeAway] = useState(false);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [modifierSheet, setModifierSheet] = useState(null);
@@ -85,7 +88,7 @@ export default function BaristaPanel() {
 
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const total = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
-  const syncing = syncingCategories || syncingProducts;
+  const syncing = syncingCategories || syncingProducts || syncingSettings;
   const error = categoriesError || productsError;
 
   const addProduct = (product) => {
@@ -204,39 +207,74 @@ export default function BaristaPanel() {
   const clearCart = () => {
     setCartItems([]);
     setOrderNote('');
+    setCustomerName('');
+    setTakeAway(false);
     setFeedback(null);
   };
 
   const confirmOrder = async () => {
     if (cartItems.length === 0 || saving) return;
+    const whatsappNumber = normalizeWhatsAppNumber(settings.whatsappOrderNumber);
+    const whatsappWindow = whatsappNumber ? window.open('', '_blank') : null;
     setSaving(true);
     setFeedback(null);
 
     try {
+      const normalizedCustomerName = customerName.trim();
+      const normalizedNote = orderNote.trim();
+      const items = cartItems.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        subtotal: item.subtotal,
+        modifiers: item.modifiers,
+        note: item.note,
+      }));
       const result = await orderService.create({
         status: 'pendiente_pago',
         paymentStatus: 'pendiente',
         paymentMethod: null,
-        items: cartItems.map((item) => ({
-          productId: item.productId,
-          name: item.name,
-          category: item.category,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          subtotal: item.subtotal,
-          modifiers: item.modifiers,
-          note: item.note,
-        })),
+        customerName: normalizedCustomerName,
+        takeAway,
+        items,
         total,
-        note: orderNote.trim(),
+        note: normalizedNote,
         createdBy: 'barista',
         source: 'barista_panel',
       });
 
-      setFeedback({ type: 'success', orderNumber: result.orderNumber });
+      const whatsappUrl = buildOrderWhatsAppUrl(whatsappNumber, {
+        orderNumber: result.orderNumber,
+        customerName: normalizedCustomerName,
+        takeAway,
+        items,
+        total,
+        note: normalizedNote,
+      });
+
+      if (whatsappUrl && whatsappWindow) {
+        whatsappWindow.location.href = whatsappUrl;
+      } else if (whatsappWindow) {
+        whatsappWindow.close();
+      }
+
+      setFeedback({
+        type: 'success',
+        orderNumber: result.orderNumber,
+        customerName: normalizedCustomerName,
+        takeAway,
+        whatsappConfigured: Boolean(whatsappUrl),
+        whatsappOpened: Boolean(whatsappUrl && whatsappWindow),
+        whatsappUrl,
+      });
       setCartItems([]);
       setOrderNote('');
+      setCustomerName('');
+      setTakeAway(false);
     } catch (err) {
+      whatsappWindow?.close();
       console.error('Error creando pedido', err);
       setFeedback({ type: 'error', message: err.message || 'No se pudo crear el pedido.' });
     } finally {
@@ -261,7 +299,14 @@ export default function BaristaPanel() {
         {feedback?.type === 'success' && (
           <section className="barista-confirmation" aria-live="polite">
             <CheckCircle2 size={20} />
-            <span>Pedido #{feedback.orderNumber} creado</span>
+            <span>
+              Pedido #{feedback.orderNumber}{feedback.customerName ? ` · ${feedback.customerName}` : ''} creado
+              {feedback.takeAway && <b>Para llevar</b>}
+              {!feedback.whatsappConfigured && <small>No hay WhatsApp configurado para avisos.</small>}
+              {feedback.whatsappConfigured && !feedback.whatsappOpened && feedback.whatsappUrl && (
+                <a href={feedback.whatsappUrl} target="_blank" rel="noreferrer">Abrir WhatsApp</a>
+              )}
+            </span>
           </section>
         )}
 
@@ -271,7 +316,7 @@ export default function BaristaPanel() {
           </section>
         )}
 
-        {error && <section className="barista-error">No se pudo sincronizar el menu.</section>}
+        {error && <section className="barista-error">No se pudo sincronizar el menú.</section>}
         {syncing && (
           <section className="barista-sync">
             <Loader2 size={18} />
@@ -279,7 +324,7 @@ export default function BaristaPanel() {
           </section>
         )}
 
-        <nav className="barista-categories" aria-label="Categorias">
+        <nav className="barista-categories" aria-label="Categorías">
           {fixedCategories.map(({ key, label, category }) => (
             <button
               className={`barista-category ${activeCategoryKey === key ? 'is-active' : ''}`}
@@ -313,7 +358,7 @@ export default function BaristaPanel() {
             <textarea
               value={orderNote}
               onChange={(event) => setOrderNote(event.target.value)}
-              placeholder="Ej: para llevar, sin azucar, separar bebidas"
+              placeholder="Ej: sin azúcar, separar bebidas"
             />
           </label>
         </section>
@@ -327,6 +372,26 @@ export default function BaristaPanel() {
             <button className="barista-clear" type="button" onClick={clearCart} disabled={cartItems.length === 0 || saving}>
               <Trash2 size={17} />
               Limpiar
+            </button>
+          </div>
+
+          <div className="barista-order-options">
+            <label className="barista-order-name">
+              Nombre
+              <input
+                value={customerName}
+                onChange={(event) => setCustomerName(event.target.value)}
+                placeholder="Juan, Mesa 2"
+                maxLength={40}
+              />
+            </label>
+            <button
+              className={`barista-takeaway ${takeAway ? 'is-active' : ''}`}
+              type="button"
+              aria-pressed={takeAway}
+              onClick={() => setTakeAway((value) => !value)}
+            >
+              Para llevar
             </button>
           </div>
 
@@ -358,7 +423,7 @@ export default function BaristaPanel() {
             className="barista-confirm"
             type="button"
             onClick={confirmOrder}
-            disabled={cartItems.length === 0 || saving}
+            disabled={cartItems.length === 0 || saving || syncingSettings}
           >
             {saving ? (
               <>

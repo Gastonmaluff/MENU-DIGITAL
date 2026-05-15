@@ -1107,7 +1107,7 @@ button { cursor: pointer; }
   min-height: 100vh;
   width: min(980px, 100%);
   margin: 0 auto;
-  padding: 18px 14px 300px;
+  padding: 18px 14px 350px;
   display: grid;
   align-content: start;
   gap: 14px;
@@ -1159,6 +1159,27 @@ button { cursor: pointer; }
   display: flex;
   align-items: center;
   gap: 9px;
+}
+.barista-confirmation span {
+  display: grid;
+  gap: 4px;
+}
+.barista-confirmation b,
+.barista-confirmation small,
+.barista-confirmation a {
+  width: fit-content;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+.barista-confirmation b,
+.barista-confirmation a {
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, #21825b 12%, transparent);
+  padding: 3px 8px;
+}
+.barista-confirmation a {
+  color: inherit;
+  text-decoration: none;
 }
 .barista-confirmation {
   border-color: color-mix(in srgb, #21825b 28%, var(--border));
@@ -1351,6 +1372,50 @@ button { cursor: pointer; }
 .barista-confirm:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+.barista-order-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: end;
+}
+.barista-order-name {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.barista-order-name input {
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--surface);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.barista-takeaway {
+  min-height: 42px;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: 15px;
+  background: var(--surface);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.barista-takeaway.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff8ef;
 }
 .barista-cart-items {
   max-height: 150px;
@@ -2073,6 +2138,15 @@ textarea {
   font-size: 0.78rem;
   font-weight: 900;
 }
+.order-takeaway-badge {
+  width: fit-content;
+  border-radius: 999px;
+  background: rgba(184, 121, 52, 0.14);
+  color: #8b541d;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
 .order-card-meta {
   border: 1px solid rgba(90, 60, 40, 0.1);
   border-radius: 16px;
@@ -2358,7 +2432,7 @@ textarea {
 
 @media (min-width: 700px) {
   .barista-page {
-    padding: 24px 22px 320px;
+    padding: 24px 22px 360px;
     gap: 18px;
   }
   .barista-header h1 {
@@ -2409,6 +2483,12 @@ textarea {
 }
 
 @media (max-width: 420px) {
+  .barista-order-options {
+    grid-template-columns: 1fr;
+  }
+  .barista-takeaway {
+    width: 100%;
+  }
   .barista-cart-item {
     grid-template-columns: minmax(0, 1fr) auto;
   }

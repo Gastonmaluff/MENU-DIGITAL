@@ -361,6 +361,7 @@ export const demoSettings = {
   menuSubtitle: 'Café Gourmet',
   footerText: '',
   showFooter: false,
+  whatsappOrderNumber: '',
   themeMode: 'light',
   primaryColor: '#B87934',
   backgroundColor: '#F7F1EA',
