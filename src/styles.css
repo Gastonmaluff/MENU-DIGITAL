@@ -2340,6 +2340,9 @@ textarea {
 .admin-error-text {
   color: #9a2e1b;
 }
+.admin-success-text {
+  color: #1b6c43;
+}
 .admin-warning-text {
   color: #875913;
   display: block;

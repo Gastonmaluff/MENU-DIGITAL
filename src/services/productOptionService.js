@@ -20,6 +20,10 @@ export const productOptionService = {
     await updateDocument('productOptions', id, normalizeProductOptionPayload({ ...payload, id }));
     return id;
   },
-  update: (id, payload) => updateDocument('productOptions', id, normalizeProductOptionPayload({ ...payload, id })),
+  update: async (id, payload) => {
+    const normalizedPayload = normalizeProductOptionPayload({ ...payload, id });
+    await updateDocument('productOptions', id, normalizedPayload);
+    return { id, ...normalizedPayload };
+  },
   remove: (id) => deleteDocument('productOptions', id),
 };

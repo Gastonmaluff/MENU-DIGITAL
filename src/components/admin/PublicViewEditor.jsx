@@ -21,6 +21,8 @@ import { formatPrice, slugify } from '../../utils/format';
 import {
   formatOptionPrice,
   getProductOptionIds,
+  normalizeProductOption,
+  parseOptionExtraPrice,
   productOptionIconChoices,
   productOptionIconMap,
 } from '../../utils/productOptions';
@@ -58,7 +60,13 @@ export default function PublicViewEditor() {
   const { user } = useAuth();
   const { items: categories, syncing: syncingCategories, error: categoriesError, reload: reloadCategories } = useCategories();
   const { items: products, syncing: syncingProducts, error: productsError, reload: reloadProducts } = useProducts();
-  const { items: productOptions, syncing: syncingProductOptions, error: productOptionsError, reload: reloadProductOptions } = useProductOptions();
+  const {
+    items: productOptions,
+    setItems: setProductOptions,
+    syncing: syncingProductOptions,
+    error: productOptionsError,
+    reload: reloadProductOptions,
+  } = useProductOptions();
   const [activeCategoryId, setActiveCategoryId] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -164,6 +172,15 @@ export default function PublicViewEditor() {
     setEditingProduct(product);
     focusProductForm();
   }, [focusProductForm]);
+
+  const updateProductOptionLocally = useCallback((option) => {
+    const normalizedOption = normalizeProductOption(option);
+    setProductOptions((currentOptions) =>
+      currentOptions.map((currentOption) =>
+        currentOption.id === normalizedOption.id ? normalizedOption : currentOption,
+      ),
+    );
+  }, [setProductOptions]);
 
   return (
     <div className="admin-page editor-page">
@@ -283,6 +300,7 @@ export default function PublicViewEditor() {
                 saving={saving}
                 nameInputRef={productNameInputRef}
                 onOptionsReload={reloadProductOptions}
+                onOptionSaved={updateProductOptionLocally}
                 onCancel={() => setEditingProduct(null)}
                 onSave={saveProduct}
               />
@@ -326,7 +344,7 @@ function CategoryEditor({ category, saving, onCancel, onSave }) {
   );
 }
 
-function ProductEditor({ product, productOptions, saving, nameInputRef, onOptionsReload, onCancel, onSave }) {
+function ProductEditor({ product, productOptions, saving, nameInputRef, onOptionsReload, onOptionSaved, onCancel, onSave }) {
   const [pendingUploads, setPendingUploads] = useState(0);
   const [imageUploadError, setImageUploadError] = useState('');
   const [form, setForm] = useState({
@@ -395,6 +413,7 @@ function ProductEditor({ product, productOptions, saving, nameInputRef, onOption
         onToggle={toggleOption}
         onCreated={(id) => setForm((current) => ({ ...current, optionIds: [...new Set([...(current.optionIds || []), id])] }))}
         onOptionsReload={onOptionsReload}
+        onOptionSaved={onOptionSaved}
       />
       <div className="admin-switch-row">
         <label className="admin-checkbox"><input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} /> Visible</label>
@@ -410,10 +429,11 @@ function ProductEditor({ product, productOptions, saving, nameInputRef, onOption
   );
 }
 
-function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onCreated, onOptionsReload }) {
+function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onCreated, onOptionsReload, onOptionSaved }) {
   const [creating, setCreating] = useState(false);
   const [savingOption, setSavingOption] = useState(false);
   const [optionError, setOptionError] = useState('');
+  const [optionFeedback, setOptionFeedback] = useState('');
   const [editingOption, setEditingOption] = useState(null);
   const [newOption, setNewOption] = useState({
     nombre: '',
@@ -422,41 +442,48 @@ function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onC
     enabled: true,
   });
 
-  const saveOption = async (event) => {
-    event.preventDefault();
+  const saveOption = async () => {
     if (!newOption.nombre.trim()) return;
 
     setSavingOption(true);
     setOptionError('');
+    setOptionFeedback('');
     try {
       const id = await productOptionService.create({
         ...newOption,
+        precioExtra: parseOptionExtraPrice(newOption.precioExtra),
         sortOrder: productOptions.length + 1,
       });
       await onOptionsReload();
       onCreated(id);
       setNewOption({ nombre: '', precioExtra: 0, icono: '', enabled: true });
       setCreating(false);
+      setOptionFeedback('Opción creada.');
     } catch (err) {
-      console.error('Error guardando opcion', err);
+      console.error('Error guardando opción', err);
       setOptionError(formatFirebaseWriteError(err));
     } finally {
       setSavingOption(false);
     }
   };
 
-  const saveExistingOption = async (event) => {
-    event.preventDefault();
+  const saveExistingOption = async () => {
     if (!editingOption?.nombre?.trim()) return;
 
     setSavingOption(true);
     setOptionError('');
+    setOptionFeedback('');
     try {
-      await productOptionService.update(editingOption.id, editingOption);
+      const savedOption = await productOptionService.update(editingOption.id, {
+        ...editingOption,
+        precioExtra: parseOptionExtraPrice(editingOption.precioExtra),
+      });
+      onOptionSaved(savedOption);
       await onOptionsReload();
       setEditingOption(null);
+      setOptionFeedback('Opción guardada.');
     } catch (err) {
-      console.error('Error actualizando opcion', err);
+      console.error('Error actualizando opción', err);
       setOptionError(formatFirebaseWriteError(err));
     } finally {
       setSavingOption(false);
@@ -468,11 +495,12 @@ function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onC
 
     setSavingOption(true);
     setOptionError('');
+    setOptionFeedback('');
     try {
       await productOptionService.remove(option.id);
       await onOptionsReload();
     } catch (err) {
-      console.error('Error eliminando opcion', err);
+      console.error('Error eliminando opción', err);
       setOptionError(formatFirebaseWriteError(err));
     } finally {
       setSavingOption(false);
@@ -490,6 +518,8 @@ function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onC
           <Plus size={17} /> Nueva opción
         </button>
       </div>
+      {optionFeedback && <small className="admin-success-text">{optionFeedback}</small>}
+      {optionError && <small className="admin-error-text">{optionError}</small>}
 
       <div className="product-option-list">
         {productOptions.map((option) => {
@@ -529,7 +559,7 @@ function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onC
       </div>
 
       {editingOption && (
-        <form className="product-option-create" onSubmit={saveExistingOption}>
+        <div className="product-option-create">
           <div className="form-grid">
             <label>
               Nombre de la opción
@@ -542,10 +572,11 @@ function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onC
             <label>
               Precio adicional
               <input
-                type="number"
-                min="0"
+                type="text"
+                inputMode="numeric"
                 value={editingOption.precioExtra}
                 onChange={(event) => setEditingOption({ ...editingOption, precioExtra: event.target.value })}
+                placeholder="0"
               />
             </label>
             <label>
@@ -565,18 +596,17 @@ function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onC
               Visible
             </label>
           </div>
-          {optionError && <small className="admin-error-text">{optionError}</small>}
           <div className="admin-form-actions">
             <button className="admin-secondary-button" type="button" onClick={() => setEditingOption(null)}>Cancelar</button>
-            <button className="admin-primary-button" type="submit" disabled={savingOption}>
+            <button className="admin-primary-button" type="button" onClick={saveExistingOption} disabled={savingOption}>
               {savingOption ? 'Guardando...' : 'Guardar cambios'}
             </button>
           </div>
-        </form>
+        </div>
       )}
 
       {creating && (
-        <form className="product-option-create" onSubmit={saveOption}>
+        <div className="product-option-create">
           <div className="form-grid">
             <label>
               Nombre de la opción
@@ -590,10 +620,11 @@ function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onC
             <label>
               Precio adicional
               <input
-                type="number"
-                min="0"
+                type="text"
+                inputMode="numeric"
                 value={newOption.precioExtra}
                 onChange={(event) => setNewOption({ ...newOption, precioExtra: event.target.value })}
+                placeholder="0"
               />
             </label>
             <label>
@@ -613,14 +644,13 @@ function ProductOptionsEditor({ selectedOptionIds, productOptions, onToggle, onC
               Visible
             </label>
           </div>
-          {optionError && <small className="admin-error-text">{optionError}</small>}
           <div className="admin-form-actions">
             <button className="admin-secondary-button" type="button" onClick={() => setCreating(false)}>Cancelar</button>
-            <button className="admin-primary-button" type="submit" disabled={savingOption}>
+            <button className="admin-primary-button" type="button" onClick={saveOption} disabled={savingOption}>
               {savingOption ? 'Guardando...' : 'Guardar opción'}
             </button>
           </div>
-        </form>
+        </div>
       )}
     </section>
   );
