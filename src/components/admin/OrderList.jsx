@@ -72,9 +72,19 @@ const dateLabel = (date) => {
   const today = startOfDay(new Date());
   const target = startOfDay(date);
   const formatted = new Intl.DateTimeFormat('es-PY', { day: '2-digit', month: '2-digit' }).format(date);
-  if (target.getTime() === today.getTime()) return `Hoy — ${formatted}`;
-  if (target.getTime() === addDays(today, -1).getTime()) return `Ayer — ${formatted}`;
+  if (target.getTime() === today.getTime()) return `Hoy - ${formatted}`;
+  if (target.getTime() === addDays(today, -1).getTime()) return `Ayer - ${formatted}`;
+  if (target.getTime() === addDays(today, -2).getTime()) return `Antes de ayer - ${formatted}`;
   return formatted;
+};
+
+const weekGroupLabel = (date) => {
+  const relativeLabel = dateLabel(date);
+  if (relativeLabel.includes(' - ')) return relativeLabel;
+
+  const day = new Intl.DateTimeFormat('es-PY', { weekday: 'long' }).format(date);
+  const formatted = new Intl.DateTimeFormat('es-PY', { day: '2-digit', month: '2-digit' }).format(date);
+  return `${day.charAt(0).toUpperCase()}${day.slice(1)} - ${formatted}`;
 };
 
 const formatTime = (value) => {
@@ -184,6 +194,32 @@ const groupByDate = (orders) => {
     .sort((a, b) => b.latestTime - a.latestTime);
 };
 
+const buildWeekDateGroups = (orders) => {
+  const today = startOfDay(new Date());
+  const groups = Array.from({ length: 7 }, (_, index) => {
+    const date = addDays(today, -index);
+    return {
+      key: dateKey(date),
+      date,
+      label: weekGroupLabel(date),
+      orders: [],
+      latestTime: date.getTime(),
+    };
+  });
+  const byKey = new Map(groups.map((group) => [group.key, group]));
+
+  orders.forEach((order) => {
+    const date = toDate(order.createdAt);
+    const group = byKey.get(dateKey(date));
+    if (group) group.orders.push(order);
+  });
+
+  return groups.map((group) => ({
+    ...group,
+    orders: group.orders.sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)),
+  }));
+};
+
 const summarizeOrders = (orders) => {
   const paidOrders = orders.filter((order) => isPaid(order) && !isCancelled(order));
   const pendingOrders = orders.filter(isPending);
@@ -204,7 +240,9 @@ const summarizeOrders = (orders) => {
       });
     });
 
-  const topProduct = [...productTotals.values()].sort((a, b) => b.quantity - a.quantity)[0];
+  const soldProducts = [...productTotals.values()].filter((item) => item.quantity > 0);
+  const topProduct = [...soldProducts].sort((a, b) => b.quantity - a.quantity)[0];
+  const bottomProduct = [...soldProducts].sort((a, b) => a.quantity - b.quantity)[0];
 
   return {
     count: orders.length,
@@ -216,6 +254,7 @@ const summarizeOrders = (orders) => {
     cancelledAmount,
     averageTicket: paidOrders.length ? paidSales / paidOrders.length : 0,
     topProduct,
+    bottomProduct,
   };
 };
 
@@ -223,9 +262,13 @@ const getLastSevenDaySales = (orders) => {
   const today = startOfDay(new Date());
   const days = Array.from({ length: 7 }, (_, index) => {
     const date = addDays(today, index - 6);
+    const dayLong = new Intl.DateTimeFormat('es-PY', { weekday: 'long' }).format(date);
+    const dayShort = new Intl.DateTimeFormat('es-PY', { weekday: 'short' }).format(date).replace('.', '');
     return {
       key: dateKey(date),
-      label: new Intl.DateTimeFormat('es-PY', { day: '2-digit', month: '2-digit' }).format(date),
+      dayLabel: `${dayLong.charAt(0).toUpperCase()}${dayLong.slice(1)}`,
+      dayShortLabel: `${dayShort.charAt(0).toUpperCase()}${dayShort.slice(1)}`,
+      dateLabel: new Intl.DateTimeFormat('es-PY', { day: '2-digit', month: '2-digit' }).format(date),
       value: 0,
     };
   });
@@ -300,7 +343,7 @@ export default function OrderList() {
 
   const visibleOrders = filteredOrders.filter((order) => !isCancelled(order));
   const cancelledOrders = filteredOrders.filter(isCancelled);
-  const dateGroups = groupByDate(visibleOrders);
+  const dateGroups = dateFilter === '7days' ? buildWeekDateGroups(visibleOrders) : groupByDate(visibleOrders);
   const summary = summarizeOrders(filteredOrders);
   const salesByDay = getLastSevenDaySales(filteredOrders);
   const productRanking = getProductRanking(filteredOrders);
@@ -369,7 +412,7 @@ export default function OrderList() {
 
       <section className="orders-date-stack" aria-label="Pedidos agrupados por fecha">
         {dateGroups.map((group, index) => {
-          const defaultOpen = index === 0;
+          const defaultOpen = dateFilter === '7days' ? index === 0 : index === 0;
           const isOpen = collapsedGroups[group.key] ?? defaultOpen;
           const groupSummary = summarizeOrders(group.orders);
 
@@ -377,7 +420,7 @@ export default function OrderList() {
             <article className="orders-date-group" key={group.key}>
               <button className="orders-date-toggle" type="button" onClick={() => toggleGroup(group.key, defaultOpen)}>
                 <div>
-                  <strong>{dateLabel(group.date)}</strong>
+                  <strong>{group.label || dateLabel(group.date)}</strong>
                   <span>
                     {groupSummary.count} pedidos · {formatMoney(groupSummary.paidSales)} · {groupSummary.paidCount} pagados ·{' '}
                     {groupSummary.pendingCount} pendientes
@@ -388,9 +431,13 @@ export default function OrderList() {
 
               {isOpen && (
                 <div className="orders-record-grid">
-                  {group.orders.map((order) => (
-                    <OrderRecord key={order.id} order={order} />
-                  ))}
+                  {group.orders.length > 0 ? (
+                    group.orders.map((order) => (
+                      <OrderRecord key={order.id} order={order} />
+                    ))
+                  ) : (
+                    <div className="orders-muted-box">No hay pedidos registrados en este día.</div>
+                  )}
                 </div>
               )}
             </article>
@@ -430,13 +477,18 @@ export default function OrderList() {
         <MetricCard icon={WalletCards} label="Ventas pagadas" value={formatMoney(summary.paidSales)} detail="No incluye cancelados" />
         <MetricCard icon={ClipboardList} label="Pedidos" value={summary.count} detail={`${summary.paidCount} pagados`} />
         <MetricCard icon={TrendingUp} label="Ticket promedio" value={formatMoney(summary.averageTicket)} detail="Ventas / pagados" />
-        <MetricCard icon={CalendarDays} label="Pendiente de cobro" value={formatMoney(summary.pendingAmount)} detail={`${summary.pendingCount} pedidos`} />
         <MetricCard icon={XCircle} label="Cancelados" value={summary.cancelledCount} detail={formatMoney(summary.cancelledAmount)} />
         <MetricCard
           icon={Package}
           label="Producto más vendido"
           value={summary.topProduct?.name || 'Sin datos'}
           detail={summary.topProduct ? `${summary.topProduct.quantity} unidades` : 'Sin ventas registradas'}
+        />
+        <MetricCard
+          icon={Package}
+          label="Producto menos vendido"
+          value={summary.bottomProduct?.name || 'Sin datos'}
+          detail={summary.bottomProduct ? `${summary.bottomProduct.quantity} unidades` : 'Sin ventas registradas'}
         />
       </section>
 
@@ -561,7 +613,11 @@ function SalesBars({ title, data }) {
         {data.map((item) => (
           <div className="orders-sales-bar" key={item.key}>
             <div style={{ height: `${Math.max(6, (item.value / max) * 100)}%` }} />
-            <span>{item.label}</span>
+            <span className="orders-sales-label">
+              <strong className="orders-sales-day-full">{item.dayLabel}</strong>
+              <strong className="orders-sales-day-short">{item.dayShortLabel}</strong>
+              <small>{item.dateLabel}</small>
+            </span>
           </div>
         ))}
       </div>

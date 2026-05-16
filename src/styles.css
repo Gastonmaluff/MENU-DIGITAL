@@ -2935,6 +2935,7 @@ textarea {
 }
 .orders-metric-card {
   min-width: 0;
+  min-height: 158px;
   border: 1px solid rgba(90, 60, 40, 0.1);
   border-radius: 20px;
   background: #fffdfc;
@@ -2956,12 +2957,13 @@ textarea {
   min-width: 0;
   display: grid;
   gap: 4px;
+  align-content: start;
 }
 .orders-metric-card strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  line-height: 1.1;
+  font-size: clamp(1.08rem, 1.65vw, 1.45rem);
 }
 .orders-metric-card small,
 .orders-metric-card em {
@@ -3005,11 +3007,26 @@ textarea {
   background: linear-gradient(180deg, #d7a061, #8b541d);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
-.orders-sales-bar span {
+.orders-sales-label {
   color: #7a6658;
   font-size: 0.75rem;
   font-weight: 850;
   text-align: center;
+  display: grid;
+  gap: 2px;
+  line-height: 1.05;
+}
+.orders-sales-label strong {
+  color: #1e1712;
+  font-size: 0.82rem;
+}
+.orders-sales-label small {
+  color: rgba(122, 102, 88, 0.58);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+.orders-sales-day-short {
+  display: none;
 }
 .orders-chart-row {
   display: grid;
@@ -3100,8 +3117,17 @@ textarea {
   .orders-sales-bars {
     gap: 6px;
   }
-  .orders-sales-bar span {
+  .orders-sales-day-full {
+    display: none;
+  }
+  .orders-sales-day-short {
+    display: block;
+  }
+  .orders-sales-label {
     font-size: 0.68rem;
+  }
+  .orders-sales-label small {
+    font-size: 0.62rem;
   }
 }
 .compact-editor,
