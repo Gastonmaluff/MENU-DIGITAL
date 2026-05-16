@@ -7,5 +7,6 @@ export const USER_ROLES = {
 export const getHomePathForRole = (role) => {
   if (role === USER_ROLES.ADMIN) return '/admin';
   if (role === USER_ROLES.BARISTA) return '/barista';
+  if (role === USER_ROLES.CASHIER) return '/cajera';
   return '/';
 };

@@ -1598,6 +1598,267 @@ button { cursor: pointer; }
   color: #fff8ef;
 }
 
+.cashier-page {
+  min-height: 100vh;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 22px 16px 42px;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  color: #1e1712;
+  background: #f7f1ea;
+}
+.cashier-header {
+  display: grid;
+  gap: 14px;
+}
+.cashier-header > div:first-child span,
+.cashier-section-title span,
+.cashier-order-card header span,
+.cashier-order-meta span,
+.cashier-paid-list span {
+  color: #7a6658;
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.cashier-header h1 {
+  margin: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.7rem;
+  line-height: 0.95;
+}
+.cashier-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.cashier-summary article,
+.cashier-toolbar,
+.cashier-section,
+.cashier-order-card,
+.cashier-feedback,
+.cashier-error,
+.cashier-empty {
+  border: 1px solid rgba(90, 60, 40, 0.1);
+  border-radius: 20px;
+  background: #fffdfc;
+  box-shadow: 0 18px 50px rgba(79, 52, 31, 0.08);
+}
+.cashier-summary article {
+  padding: 14px;
+  display: grid;
+  gap: 4px;
+}
+.cashier-summary strong {
+  color: #b87934;
+  font-size: 1.35rem;
+}
+.cashier-toolbar {
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+.cashier-search {
+  min-height: 48px;
+  border: 1px solid rgba(90, 60, 40, 0.12);
+  border-radius: 999px;
+  background: #fbf7f2;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #7a6658;
+}
+.cashier-search input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #1e1712;
+  font: inherit;
+  font-weight: 800;
+  outline: none;
+}
+.cashier-sync,
+.cashier-feedback,
+.cashier-error {
+  padding: 11px 13px;
+}
+.cashier-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #7a6658;
+  font-weight: 800;
+}
+.cashier-sync .lucide-loader-2,
+.cashier-paid .lucide-loader-2 {
+  animation: barista-spin 900ms linear infinite;
+}
+.cashier-feedback {
+  color: #1b6c43;
+}
+.cashier-error {
+  color: #9a2e1b;
+}
+.cashier-section {
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+.cashier-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cashier-order-list {
+  display: grid;
+  gap: 12px;
+}
+.cashier-order-card {
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+.cashier-order-card header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cashier-order-card h2 {
+  margin: 2px 0 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2rem;
+  line-height: 0.95;
+}
+.cashier-order-card header > strong {
+  color: #b87934;
+  font-size: 1.5rem;
+  white-space: nowrap;
+}
+.cashier-order-card header b {
+  width: fit-content;
+  display: inline-flex;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: rgba(184, 121, 52, 0.14);
+  color: #8b541d;
+  padding: 6px 9px;
+  font-size: 0.76rem;
+}
+.cashier-order-meta,
+.cashier-items div,
+.cashier-paid-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.cashier-order-meta {
+  border-radius: 14px;
+  background: #fbf7f2;
+  padding: 10px 12px;
+}
+.cashier-items {
+  display: grid;
+  gap: 7px;
+}
+.cashier-items div {
+  border-bottom: 1px solid rgba(90, 60, 40, 0.08);
+  padding-bottom: 7px;
+}
+.cashier-items div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.cashier-items span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cashier-note {
+  margin: 0;
+  border-radius: 14px;
+  background: #fbf7f2;
+  color: #7a6658;
+  padding: 10px 12px;
+  font-weight: 700;
+}
+.cashier-methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.cashier-methods button,
+.cashier-actions button {
+  min-height: 44px;
+  border: 1px solid rgba(90, 60, 40, 0.12);
+  border-radius: 14px;
+  background: #fbf7f2;
+  color: #1e1712;
+  padding: 10px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-weight: 900;
+}
+.cashier-methods button.is-active {
+  background: #1e1712;
+  border-color: #1e1712;
+  color: #fff8ef;
+}
+.cashier-actions {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 9px;
+}
+.cashier-actions button:disabled,
+.cashier-methods button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.cashier-paid {
+  background: #b87934 !important;
+  border-color: #b87934 !important;
+  color: #fff8ef !important;
+}
+.cashier-cancel {
+  color: #9a2e1b !important;
+}
+.cashier-empty {
+  min-height: 150px;
+  color: #7a6658;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+}
+.cashier-section--paid {
+  box-shadow: none;
+}
+.cashier-paid-list {
+  display: grid;
+  gap: 8px;
+}
+.cashier-paid-list article {
+  border-radius: 14px;
+  background: #fbf7f2;
+  padding: 11px 12px;
+}
+.cashier-paid-list strong,
+.cashier-paid-list span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .admin-public-screen {
   min-height: 100vh;
   display: grid;
@@ -2480,9 +2741,25 @@ textarea {
     max-height: 172px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .cashier-header {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
+    align-items: end;
+  }
+  .cashier-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .cashier-order-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 420px) {
+  .cashier-summary,
+  .cashier-methods,
+  .cashier-actions {
+    grid-template-columns: 1fr;
+  }
   .barista-order-options {
     grid-template-columns: 1fr;
   }

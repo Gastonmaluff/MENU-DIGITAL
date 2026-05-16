@@ -65,7 +65,8 @@ service cloud.firestore {
     match /orders/{docId} {
       allow read: if isStaff();
       allow create: if isAdmin() || isBarista() || isCashier();
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin() || isCashier();
+      allow delete: if isAdmin();
     }
 
     match /orderCounters/{docId} {
