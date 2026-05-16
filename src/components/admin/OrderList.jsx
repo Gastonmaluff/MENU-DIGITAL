@@ -1,8 +1,5 @@
-import { Ban, CheckCircle2, CircleDollarSign, Coffee, PackageCheck, Play, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+import { CheckCircle2, Coffee, XCircle } from 'lucide-react';
 import { useOrders } from '../../hooks/useOrders';
-import { orderService } from '../../services/orderService';
-import { formatFirebaseWriteError } from '../../utils/firebaseErrors';
 import { formatPrice } from '../../utils/format';
 
 const statusLabels = {
@@ -13,14 +10,6 @@ const statusLabels = {
   entregado: 'Entregado',
   cancelado: 'Cancelado',
 };
-
-const actionButtons = [
-  { status: 'pagado', label: 'Pagado', icon: CircleDollarSign },
-  { status: 'en_preparacion', label: 'Preparar', icon: Play },
-  { status: 'listo', label: 'Listo', icon: CheckCircle2 },
-  { status: 'entregado', label: 'Entregado', icon: PackageCheck },
-  { status: 'cancelado', label: 'Cancelar', icon: Ban },
-];
 
 const formatDateTime = (value) => {
   const date = value?.toDate ? value.toDate() : value ? new Date(value) : null;
@@ -34,34 +23,20 @@ const formatDateTime = (value) => {
   }).format(date);
 };
 
+const getOrderStatusLabel = (order) => {
+  if (order.status === 'cancelado' && order.cancelledBy === 'barista') return 'Cancelado por barista';
+  return statusLabels[order.status] || order.status || 'Sin estado';
+};
+
+const getCustomerName = (order) => String(order.customerName || order.orderName || '').trim();
+
+const getOrderTitle = (order) => {
+  const customerName = getCustomerName(order);
+  return `#${order.orderNumber || '---'}${customerName ? ` · ${customerName}` : ''}`;
+};
+
 export default function OrderList() {
   const { items: orders, syncing, error } = useOrders();
-  const [updatingId, setUpdatingId] = useState('');
-  const [feedback, setFeedback] = useState('');
-
-  const updateOrderStatus = async (order, status) => {
-    setUpdatingId(order.id);
-    setFeedback('');
-
-    try {
-      if (status === 'pagado') {
-        await orderService.updatePayment(order.id, {
-          paymentStatus: 'pagado',
-          paymentMethod: order.paymentMethod || null,
-        });
-      } else if (status === 'cancelado') {
-        await orderService.cancel(order.id);
-      } else {
-        await orderService.updateStatus(order.id, status);
-      }
-      setFeedback(`Pedido #${order.orderNumber} actualizado.`);
-    } catch (err) {
-      console.error('Error actualizando pedido', err);
-      setFeedback(formatFirebaseWriteError(err));
-    } finally {
-      setUpdatingId('');
-    }
-  };
 
   const activeOrders = orders.filter((order) => order.status !== 'entregado' && order.status !== 'cancelado');
   const closedOrders = orders.filter((order) => order.status === 'entregado' || order.status === 'cancelado');
@@ -82,11 +57,10 @@ export default function OrderList() {
         </div>
       )}
       {error && <div className="admin-error">{error}</div>}
-      {feedback && <div className="admin-feedback">{feedback}</div>}
 
       <section className="orders-board" aria-label="Pedidos activos">
         {activeOrders.map((order) => (
-          <OrderCard key={order.id} order={order} updatingId={updatingId} onUpdateStatus={updateOrderStatus} />
+          <OrderCard key={order.id} order={order} />
         ))}
         {!syncing && activeOrders.length === 0 && (
           <div className="admin-empty-inline orders-empty">
@@ -103,14 +77,13 @@ export default function OrderList() {
             <span>{closedOrders.length} pedidos</span>
           </div>
           <div className="orders-history-list">
-            {closedOrders.slice(0, 8).map((order) => (
+            {closedOrders.slice(0, 12).map((order) => (
               <article className="orders-history-row" key={order.id}>
                 <strong>
-                  #{order.orderNumber}
-                  {order.customerName || order.orderName ? ` · ${order.customerName || order.orderName}` : ''}
+                  {getOrderTitle(order)}
                   {order.takeAway ? ' · Para llevar' : ''}
                 </strong>
-                <span>{statusLabels[order.status] || order.status}</span>
+                <span>{getOrderStatusLabel(order)}</span>
                 <b>{formatPrice(order.total)}</b>
               </article>
             ))}
@@ -121,20 +94,50 @@ export default function OrderList() {
   );
 }
 
-function OrderCard({ order, updatingId, onUpdateStatus }) {
-  const isUpdating = updatingId === order.id;
+function OrderPaymentIndicator({ order }) {
+  const isPaid = order.paymentStatus === 'pagado' || order.status === 'pagado';
+  const isCancelled = order.status === 'cancelado';
+
+  if (isCancelled) {
+    return (
+      <div className="order-payment-indicator is-cancelled">
+        <XCircle size={32} />
+        <strong>{order.cancelledBy === 'barista' ? 'Cancelado por barista' : 'Cancelado'}</strong>
+        <small>Registro conservado</small>
+      </div>
+    );
+  }
+
+  if (isPaid) {
+    return (
+      <div className="order-payment-indicator is-paid">
+        <CheckCircle2 size={36} />
+        <strong>Pagado</strong>
+        <small>{order.paymentMethod ? `Pago confirmado · ${order.paymentMethod}` : 'Pago confirmado'}</small>
+      </div>
+    );
+  }
+
+  return (
+    <div className="order-payment-indicator">
+      <strong>Pendiente de pago</strong>
+      <small>Esperando confirmación de caja</small>
+    </div>
+  );
+}
+
+function OrderCard({ order }) {
   const itemCount = (order.items || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-  const customerName = String(order.customerName || order.orderName || '').trim();
 
   return (
     <article className={`order-card order-card--${order.status || 'sin_estado'}`}>
       <header className="order-card-header">
         <div>
           <span>{formatDateTime(order.createdAt)}</span>
-          <h2>#{order.orderNumber || '---'}{customerName ? ` · ${customerName}` : ''}</h2>
+          <h2>{getOrderTitle(order)}</h2>
         </div>
         <div className="order-status-stack">
-          <span className="order-status-badge">{statusLabels[order.status] || order.status}</span>
+          <span className="order-status-badge">{getOrderStatusLabel(order)}</span>
           <small>{order.paymentStatus === 'pagado' ? 'Pago confirmado' : 'Pago pendiente'}</small>
         </div>
       </header>
@@ -160,19 +163,7 @@ function OrderCard({ order, updatingId, onUpdateStatus }) {
 
       {order.note && <p className="order-note">Obs: {order.note}</p>}
 
-      <div className="order-actions">
-        {actionButtons.map(({ status, label, icon: Icon }) => (
-          <button
-            type="button"
-            key={status}
-            disabled={isUpdating || order.status === status}
-            onClick={() => onUpdateStatus(order, status)}
-          >
-            {isUpdating ? <RefreshCw size={16} /> : <Icon size={16} />}
-            {label}
-          </button>
-        ))}
-      </div>
+      <OrderPaymentIndicator order={order} />
     </article>
   );
 }

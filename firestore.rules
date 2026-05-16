@@ -65,7 +65,19 @@ service cloud.firestore {
     match /orders/{docId} {
       allow read: if isStaff();
       allow create: if isAdmin() || isBarista() || isCashier();
-      allow update: if isAdmin() || isCashier();
+      allow update: if isAdmin() || isCashier() || (
+        isBarista() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'status',
+          'cancelledBy',
+          'cancelledAt',
+          'deletedFromBaristaView',
+          'updatedAt'
+        ]) &&
+        request.resource.data.status == 'cancelado' &&
+        request.resource.data.cancelledBy == 'barista' &&
+        request.resource.data.deletedFromBaristaView == true
+      );
       allow delete: if isAdmin();
     }
 

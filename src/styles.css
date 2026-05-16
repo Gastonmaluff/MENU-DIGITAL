@@ -1132,6 +1132,26 @@ button { cursor: pointer; }
   font-size: 2.2rem;
   line-height: 0.95;
 }
+.barista-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.barista-icon-link {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  color: var(--text-primary);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 24px rgba(79, 52, 31, 0.06);
+  text-decoration: none;
+}
+.barista-icon-link:active {
+  transform: scale(0.96);
+}
 .barista-live-total {
   min-height: 44px;
   border: 1px solid var(--border);
@@ -1597,6 +1617,114 @@ button { cursor: pointer; }
   background: var(--accent);
   color: #fff8ef;
 }
+.barista-orders-page {
+  padding-bottom: 42px;
+}
+.barista-order-list {
+  display: grid;
+  gap: 12px;
+}
+.barista-order-card {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--card) 96%, transparent);
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  box-shadow: 0 12px 28px rgba(79, 52, 31, 0.08);
+}
+.barista-order-card header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.barista-order-card header span {
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+.barista-order-card h2 {
+  margin: 4px 0 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2rem;
+  line-height: 0.95;
+}
+.barista-order-card header > strong {
+  color: var(--accent);
+  font-size: 1.2rem;
+  white-space: nowrap;
+}
+.barista-order-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.barista-order-badges span,
+.barista-order-badges b {
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-secondary);
+  padding: 6px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+.barista-order-badges b {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--accent);
+}
+.barista-order-items {
+  display: grid;
+  gap: 7px;
+}
+.barista-order-items div {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.barista-order-items div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.barista-order-items span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.barista-order-note {
+  margin: 0;
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  padding: 10px 12px;
+  font-weight: 800;
+}
+.barista-order-cancel {
+  min-height: 44px;
+  border: 1px solid rgba(190, 55, 55, 0.22);
+  border-radius: 15px;
+  background: color-mix(in srgb, #9f2f2f 8%, var(--surface));
+  color: #9f2f2f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 900;
+}
+.barista-order-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .cashier-page {
   min-height: 100vh;
@@ -2035,6 +2163,27 @@ button { cursor: pointer; }
   gap: 14px;
   flex-wrap: wrap;
 }
+.admin-quick-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.admin-icon-button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(90, 60, 40, 0.1);
+  border-radius: 50%;
+  background: #fffdfc;
+  color: #1e1712;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(79, 52, 31, 0.08);
+}
+.admin-icon-button:hover {
+  color: #b87934;
+  border-color: rgba(184, 121, 52, 0.3);
+}
 .admin-stats,
 .admin-card-grid,
 .admin-two-column {
@@ -2451,6 +2600,44 @@ textarea {
   color: #7a6658;
   padding: 10px 12px;
 }
+.order-payment-indicator {
+  border: 1px solid rgba(90, 60, 40, 0.1);
+  border-radius: 18px;
+  background: #fbf7f2;
+  color: #7a6658;
+  padding: 14px;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  text-align: center;
+}
+.order-payment-indicator svg {
+  color: #7a6658;
+}
+.order-payment-indicator strong {
+  color: #1e1712;
+  font-size: 1rem;
+}
+.order-payment-indicator small {
+  color: #7a6658;
+  font-weight: 800;
+}
+.order-payment-indicator.is-paid {
+  border-color: rgba(28, 118, 83, 0.22);
+  background: #edf9f1;
+}
+.order-payment-indicator.is-paid svg,
+.order-payment-indicator.is-paid strong {
+  color: #1b8a5a;
+}
+.order-payment-indicator.is-cancelled {
+  border-color: rgba(154, 46, 27, 0.2);
+  background: #fff1ee;
+}
+.order-payment-indicator.is-cancelled svg,
+.order-payment-indicator.is-cancelled strong {
+  color: #9a2e1b;
+}
 .order-actions {
   display: flex;
   flex-wrap: wrap;
@@ -2739,6 +2926,9 @@ textarea {
   }
   .barista-cart-items {
     max-height: 172px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .barista-order-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .cashier-header {

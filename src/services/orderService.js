@@ -232,4 +232,12 @@ export const orderService = {
     orderService.update(id, {
       status: 'cancelado',
     }),
+
+  cancelByBarista: (id) =>
+    orderService.update(id, {
+      status: 'cancelado',
+      cancelledBy: 'barista',
+      cancelledAt: serverTimestamp(),
+      deletedFromBaristaView: true,
+    }),
 };

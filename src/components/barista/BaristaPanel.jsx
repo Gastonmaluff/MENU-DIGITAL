@@ -1,5 +1,6 @@
-import { CheckCircle2, Loader2, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
+import { CheckCircle2, ClipboardList, Loader2, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useCategories } from '../../hooks/useCategories';
 import { useProducts } from '../../hooks/useProducts';
 import { useSettings } from '../../hooks/useSettings';
@@ -290,9 +291,14 @@ export default function BaristaPanel() {
             <span>Nirvana</span>
             <h1>Barista</h1>
           </div>
-          <div className="barista-live-total" aria-label="Total actual">
-            <ShoppingBag size={18} />
-            <strong>{formatPrice(total)}</strong>
+          <div className="barista-header-actions">
+            <Link className="barista-icon-link" to="/barista/orders" title="Ver pedidos" aria-label="Ver pedidos">
+              <ClipboardList size={20} />
+            </Link>
+            <div className="barista-live-total" aria-label="Total actual">
+              <ShoppingBag size={18} />
+              <strong>{formatPrice(total)}</strong>
+            </div>
           </div>
         </header>
 

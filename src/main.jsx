@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import BaristaPanel from './components/barista/BaristaPanel';
+import BaristaOrders from './components/barista/BaristaOrders';
 import CashierPanel from './components/cashier/CashierPanel';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -31,6 +32,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.BARISTA]}>
                 <BaristaPanel />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/barista/orders"
+            element={
+              <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.BARISTA]}>
+                <BaristaOrders />
               </ProtectedRoute>
             }
           />
