@@ -13,27 +13,6 @@ import { useMemo, useState } from 'react';
 import { useOrders } from '../../hooks/useOrders';
 import { formatPrice } from '../../utils/format';
 
-const dateFilters = [
-  { value: 'today', label: 'Hoy' },
-  { value: 'yesterday', label: 'Ayer' },
-  { value: '7days', label: 'Semana' },
-  { value: 'month', label: 'Mes' },
-  { value: 'custom', label: 'Rango' },
-];
-
-const statusFilters = [
-  { value: 'all', label: 'Todos' },
-  { value: 'paid', label: 'Pagados' },
-  { value: 'pending', label: 'Pendientes' },
-  { value: 'cancelled', label: 'Cancelados' },
-];
-
-const typeFilters = [
-  { value: 'all', label: 'Todos' },
-  { value: 'local', label: 'En local' },
-  { value: 'takeaway', label: 'Para llevar' },
-];
-
 const statusLabels = {
   pendiente_pago: 'Pendiente de pago',
   pagado: 'Pagado',
@@ -135,38 +114,36 @@ const getCancelledBy = (order) => {
   return 'Sin dato';
 };
 
-const isWithinDateFilter = (order, filter, customFrom, customTo) => {
+const isWithinWeekView = (order) => {
   const date = toDate(order.createdAt);
-  if (!date) return filter === 'all';
+  if (!date) return false;
 
   const today = startOfDay(new Date());
   const orderDay = startOfDay(date);
 
-  if (filter === 'today') return orderDay.getTime() === today.getTime();
-  if (filter === 'yesterday') return orderDay.getTime() === addDays(today, -1).getTime();
-  if (filter === '7days') return orderDay >= addDays(today, -6) && orderDay <= today;
-  if (filter === 'month') {
-    return date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth();
-  }
-  if (filter === 'custom') {
-    const from = customFrom ? startOfDay(new Date(`${customFrom}T00:00:00`)) : null;
-    const to = customTo ? addDays(startOfDay(new Date(`${customTo}T00:00:00`)), 1) : null;
-    return (!from || date >= from) && (!to || date < to);
-  }
-  return true;
+  return orderDay >= addDays(today, -6) && orderDay <= today;
 };
 
-const isWithinStatusFilter = (order, filter) => {
-  if (filter === 'paid') return isPaid(order) && !isCancelled(order);
-  if (filter === 'pending') return isPending(order);
-  if (filter === 'cancelled') return isCancelled(order);
-  return true;
+const getDateRangeBounds = (fromValue, toValue) => {
+  const fromDate = fromValue ? startOfDay(new Date(`${fromValue}T00:00:00`)) : null;
+  const toDateValue = toValue ? startOfDay(new Date(`${toValue}T00:00:00`)) : null;
+
+  if (fromDate && toDateValue && fromDate > toDateValue) {
+    return { from: toDateValue, to: addDays(fromDate, 1) };
+  }
+
+  return {
+    from: fromDate,
+    to: toDateValue ? addDays(toDateValue, 1) : null,
+  };
 };
 
-const isWithinTypeFilter = (order, filter) => {
-  if (filter === 'takeaway') return Boolean(order.takeAway);
-  if (filter === 'local') return !order.takeAway;
-  return true;
+const isWithinDateRange = (order, fromValue, toValue) => {
+  const date = toDate(order.createdAt);
+  if (!date) return false;
+
+  const { from, to } = getDateRangeBounds(fromValue, toValue);
+  return (!from || date >= from) && (!to || date < to);
 };
 
 const groupByDate = (orders) => {
@@ -251,6 +228,7 @@ const summarizeOrders = (orders) => {
     cancelledCount: cancelledOrders.length,
     paidSales,
     pendingAmount,
+    activeAmount: paidSales + pendingAmount,
     cancelledAmount,
     averageTicket: paidOrders.length ? paidSales / paidOrders.length : 0,
     topProduct,
@@ -323,31 +301,39 @@ const getCategorySales = (orders) => {
 export default function OrderList() {
   const { items: orders, syncing, error } = useOrders();
   const todayValue = toInputDate(new Date());
-  const [dateFilter, setDateFilter] = useState('7days');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [customFrom, setCustomFrom] = useState(todayValue);
-  const [customTo, setCustomTo] = useState(todayValue);
+  const [rangeFrom, setRangeFrom] = useState(todayValue);
+  const [rangeTo, setRangeTo] = useState(todayValue);
+  const [rangeQuery, setRangeQuery] = useState(null);
   const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [collapsedRangeGroups, setCollapsedRangeGroups] = useState({});
   const [cancelledOpen, setCancelledOpen] = useState(false);
+  const [rangeOpen, setRangeOpen] = useState(false);
 
-  const filteredOrders = useMemo(
+  const weeklyOrders = useMemo(
     () =>
       orders
-        .filter((order) => isWithinDateFilter(order, dateFilter, customFrom, customTo))
-        .filter((order) => isWithinStatusFilter(order, statusFilter))
-        .filter((order) => isWithinTypeFilter(order, typeFilter))
+        .filter(isWithinWeekView)
         .sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0)),
-    [orders, dateFilter, statusFilter, typeFilter, customFrom, customTo],
+    [orders],
   );
 
-  const visibleOrders = filteredOrders.filter((order) => !isCancelled(order));
-  const cancelledOrders = filteredOrders.filter(isCancelled);
-  const dateGroups = dateFilter === '7days' ? buildWeekDateGroups(visibleOrders) : groupByDate(visibleOrders);
-  const summary = summarizeOrders(filteredOrders);
-  const salesByDay = getLastSevenDaySales(filteredOrders);
-  const productRanking = getProductRanking(filteredOrders);
-  const categorySales = getCategorySales(filteredOrders);
+  const visibleOrders = weeklyOrders.filter((order) => !isCancelled(order));
+  const cancelledOrders = weeklyOrders.filter(isCancelled);
+  const dateGroups = buildWeekDateGroups(visibleOrders);
+  const rangeOrders = useMemo(
+    () =>
+      rangeQuery
+        ? orders
+            .filter((order) => isWithinDateRange(order, rangeQuery.from, rangeQuery.to))
+            .sort((a, b) => (toDate(b.createdAt)?.getTime() || 0) - (toDate(a.createdAt)?.getTime() || 0))
+        : [],
+    [orders, rangeQuery],
+  );
+  const rangeGroups = groupByDate(rangeOrders);
+  const summary = summarizeOrders(weeklyOrders);
+  const salesByDay = getLastSevenDaySales(weeklyOrders);
+  const productRanking = getProductRanking(weeklyOrders);
+  const categorySales = getCategorySales(weeklyOrders);
   const statusSummary = [
     { label: 'Pagados', value: summary.paidCount, tone: 'paid' },
     { label: 'Pendientes', value: summary.pendingCount, tone: 'pending' },
@@ -361,6 +347,19 @@ export default function OrderList() {
     }));
   };
 
+  const toggleRangeGroup = (key, defaultOpen) => {
+    setCollapsedRangeGroups((current) => ({
+      ...current,
+      [key]: !(current[key] ?? defaultOpen),
+    }));
+  };
+
+  const searchDateRange = (event) => {
+    event.preventDefault();
+    setRangeQuery({ from: rangeFrom, to: rangeTo });
+    setCollapsedRangeGroups({});
+  };
+
   return (
     <div className="admin-page orders-page orders-analytics-page">
       <header className="orders-analytics-header">
@@ -369,38 +368,7 @@ export default function OrderList() {
           <h1>Pedidos</h1>
           <p>Control comercial y registro de ventas</p>
         </div>
-
-        <div className="orders-filter-group" aria-label="Filtros rápidos de fecha">
-          {dateFilters.map((filter) => (
-            <button
-              className={dateFilter === filter.value ? 'is-active' : ''}
-              type="button"
-              key={filter.value}
-              onClick={() => setDateFilter(filter.value)}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
       </header>
-
-      <section className="orders-filter-panel" aria-label="Filtros de análisis">
-        {dateFilter === 'custom' && (
-          <div className="orders-custom-range">
-            <label>
-              Desde
-              <input type="date" value={customFrom} onChange={(event) => setCustomFrom(event.target.value)} />
-            </label>
-            <label>
-              Hasta
-              <input type="date" value={customTo} onChange={(event) => setCustomTo(event.target.value)} />
-            </label>
-          </div>
-        )}
-
-        <FilterSegment label="Estado" value={statusFilter} options={statusFilters} onChange={setStatusFilter} />
-        <FilterSegment label="Tipo" value={typeFilter} options={typeFilters} onChange={setTypeFilter} />
-      </section>
 
       {syncing && (
         <div className="admin-inline-sync">
@@ -412,7 +380,7 @@ export default function OrderList() {
 
       <section className="orders-date-stack" aria-label="Pedidos agrupados por fecha">
         {dateGroups.map((group, index) => {
-          const defaultOpen = dateFilter === '7days' ? index === 0 : index === 0;
+          const defaultOpen = index === 0;
           const isOpen = collapsedGroups[group.key] ?? defaultOpen;
           const groupSummary = summarizeOrders(group.orders);
 
@@ -422,7 +390,7 @@ export default function OrderList() {
                 <div>
                   <strong>{group.label || dateLabel(group.date)}</strong>
                   <span>
-                    {groupSummary.count} pedidos · {formatMoney(groupSummary.paidSales)} · {groupSummary.paidCount} pagados ·{' '}
+                    {groupSummary.count} pedidos · {formatMoney(groupSummary.activeAmount)} · {groupSummary.paidCount} pagados ·{' '}
                     {groupSummary.pendingCount} pendientes
                   </span>
                 </div>
@@ -473,6 +441,75 @@ export default function OrderList() {
         )}
       </section>
 
+      <section className="orders-range-section">
+        <button className="orders-date-toggle" type="button" onClick={() => setRangeOpen((value) => !value)}>
+          <div>
+            <strong>Buscar por rango de fechas</strong>
+            <span>
+              {rangeQuery ? `${rangeOrders.length} pedidos encontrados` : 'Consulta adicional sin modificar la vista semanal'}
+            </span>
+          </div>
+          <ChevronDown className={rangeOpen ? 'is-open' : ''} size={20} />
+        </button>
+
+        {rangeOpen && (
+          <div className="orders-range-body">
+            <form className="orders-custom-range" onSubmit={searchDateRange}>
+              <label>
+                Desde
+                <input type="date" value={rangeFrom} onChange={(event) => setRangeFrom(event.target.value)} />
+              </label>
+              <label>
+                Hasta
+                <input type="date" value={rangeTo} onChange={(event) => setRangeTo(event.target.value)} />
+              </label>
+              <button className="admin-primary-button" type="submit">Consultar</button>
+            </form>
+
+            {rangeQuery && (
+              <div className="orders-range-results">
+                {rangeGroups.length > 0 ? (
+                  rangeGroups.map((group, index) => {
+                    const defaultOpen = index === 0;
+                    const isOpen = collapsedRangeGroups[group.key] ?? defaultOpen;
+                    const groupSummary = summarizeOrders(group.orders);
+
+                    return (
+                      <article className="orders-date-group orders-range-group" key={group.key}>
+                        <button
+                          className="orders-date-toggle"
+                          type="button"
+                          onClick={() => toggleRangeGroup(group.key, defaultOpen)}
+                        >
+                          <div>
+                            <strong>{dateLabel(group.date)}</strong>
+                            <span>
+                              {groupSummary.count} pedidos · {formatMoney(groupSummary.activeAmount)} ·{' '}
+                              {groupSummary.paidCount} pagados · {groupSummary.pendingCount} pendientes
+                            </span>
+                          </div>
+                          <ChevronDown className={isOpen ? 'is-open' : ''} size={20} />
+                        </button>
+
+                        {isOpen && (
+                          <div className="orders-record-grid">
+                            {group.orders.map((order) => (
+                              <OrderRecord key={order.id} order={order} />
+                            ))}
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })
+                ) : (
+                  <div className="orders-muted-box">No se encontraron pedidos en ese rango.</div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+
       <section className="orders-commercial-cards" aria-label="Resumen comercial">
         <MetricCard icon={WalletCards} label="Ventas pagadas" value={formatMoney(summary.paidSales)} detail="No incluye cancelados" />
         <MetricCard icon={ClipboardList} label="Pedidos" value={summary.count} detail={`${summary.paidCount} pagados`} />
@@ -502,26 +539,6 @@ export default function OrderList() {
   );
 }
 
-function FilterSegment({ label, value, options, onChange }) {
-  return (
-    <div className="orders-filter-segment">
-      <span>{label}</span>
-      <div>
-        {options.map((option) => (
-          <button
-            className={value === option.value ? 'is-active' : ''}
-            type="button"
-            key={option.value}
-            onClick={() => onChange(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function MetricCard({ icon: Icon, label, value, detail }) {
   return (
     <article className="orders-metric-card">
@@ -539,6 +556,7 @@ function OrderRecord({ order }) {
   const items = order.items || [];
   const itemCount = items.reduce((sum, item) => sum + getItemQuantity(item), 0);
   const customerName = getCustomerName(order);
+  const statusTone = isCancelled(order) ? 'cancelled' : isPaid(order) ? 'paid' : 'pending';
 
   return (
     <article className="orders-record-card">
@@ -553,7 +571,7 @@ function OrderRecord({ order }) {
       </header>
 
       <div className="orders-record-meta">
-        <Badge tone={isPaid(order) ? 'paid' : 'pending'}>{isPaid(order) ? 'Pagado' : 'Pendiente de pago'}</Badge>
+        <Badge tone={statusTone}>{getStatusLabel(order)}</Badge>
         {order.paymentMethod && <span>{order.paymentMethod}</span>}
         <span>{itemCount} productos</span>
       </div>

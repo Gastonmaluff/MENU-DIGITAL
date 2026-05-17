@@ -2787,6 +2787,7 @@ textarea {
 }
 .orders-date-group,
 .orders-cancelled-section,
+.orders-range-section,
 .orders-chart-card {
   border: 1px solid rgba(90, 60, 40, 0.1);
   border-radius: 22px;
@@ -2921,12 +2922,31 @@ textarea {
 .orders-cancelled-section {
   border-color: rgba(154, 46, 27, 0.14);
 }
+.orders-range-section {
+  border-color: rgba(184, 121, 52, 0.18);
+}
 .orders-cancelled-list {
   border-top: 1px solid rgba(90, 60, 40, 0.08);
   padding: 16px;
 }
 .orders-cancelled-card {
   background: #fff7f4;
+}
+.orders-range-body {
+  border-top: 1px solid rgba(90, 60, 40, 0.08);
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+.orders-range-body .orders-custom-range {
+  align-items: end;
+}
+.orders-range-results {
+  display: grid;
+  gap: 12px;
+}
+.orders-range-group {
+  box-shadow: none;
 }
 .orders-commercial-cards {
   display: grid;
@@ -3102,6 +3122,7 @@ textarea {
   .orders-date-toggle,
   .orders-record-grid,
   .orders-cancelled-list,
+  .orders-range-body,
   .orders-chart-card {
     padding: 14px;
   }
