@@ -44,6 +44,31 @@ const matchesSearch = (order, search) => {
     .includes(query);
 };
 
+const toDate = (value) => {
+  const date = value?.toDate ? value.toDate() : value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date : null;
+};
+
+const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const isSameDay = (value, day = new Date()) => {
+  const date = toDate(value);
+  if (!date) return false;
+  return startOfDay(date).getTime() === startOfDay(day).getTime();
+};
+
+const isCancelled = (order) =>
+  ['cancelado', 'cancelled', 'deleted_by_barista'].includes(order.status) || order.deletedFromBaristaView === true;
+
+const isPaid = (order) =>
+  ['pagado', 'paid'].includes(order.paymentStatus) || ['pagado', 'paid'].includes(order.status);
+
+const isActivePendingOrder = (order) => !isCancelled(order) && !isPaid(order) && order.status !== 'entregado';
+
+const getPaidDate = (order) => order.paidAt || order.updatedAt || order.createdAt;
+
+const pluralizeOrder = (count) => `${count} ${count === 1 ? 'pedido activo' : 'pedidos activos'}`;
+
 export default function CashierPanel() {
   const { items: orders, syncing, error } = useOrders();
   const [search, setSearch] = useState('');
@@ -54,10 +79,7 @@ export default function CashierPanel() {
   const pendingOrders = useMemo(
     () =>
       orders.filter((order) =>
-        order.status !== 'cancelado' &&
-        order.status !== 'entregado' &&
-        order.paymentStatus !== 'pagado' &&
-        matchesSearch(order, search),
+        isActivePendingOrder(order) && matchesSearch(order, search),
       ),
     [orders, search],
   );
@@ -65,15 +87,23 @@ export default function CashierPanel() {
   const paidOrders = useMemo(
     () =>
       orders.filter((order) =>
-        order.paymentStatus === 'pagado' &&
-        order.status !== 'cancelado' &&
-        matchesSearch(order, search),
+        isPaid(order) && !isCancelled(order) && matchesSearch(order, search),
       ),
     [orders, search],
   );
 
-  const pendingTotal = pendingOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
-  const paidTotal = paidOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+  const activeOrders = useMemo(
+    () => orders.filter(isActivePendingOrder),
+    [orders],
+  );
+
+  const paidTodayOrders = useMemo(
+    () => orders.filter((order) => isPaid(order) && !isCancelled(order) && isSameDay(getPaidDate(order))),
+    [orders],
+  );
+
+  const pendingTotal = activeOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+  const paidTodayTotal = paidTodayOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
 
   const markPaid = async (order) => {
     const paymentMethod = paymentSelection[order.id] || order.paymentMethod || 'efectivo';
@@ -119,12 +149,19 @@ export default function CashierPanel() {
         </div>
         <div className="cashier-summary">
           <article>
-            <span>Pendiente</span>
-            <strong>{formatPrice(pendingTotal)}</strong>
+            <span>Pedidos activos</span>
+            <strong>{activeOrders.length}</strong>
+            <small>Pendientes de cobro</small>
           </article>
           <article>
-            <span>Cobrado</span>
-            <strong>{formatPrice(paidTotal)}</strong>
+            <span>Pendiente de cobro</span>
+            <strong>{formatPrice(pendingTotal)}</strong>
+            <small>{pluralizeOrder(activeOrders.length)}</small>
+          </article>
+          <article>
+            <span>Cobrado hoy</span>
+            <strong>{formatPrice(paidTodayTotal)}</strong>
+            <small>{paidTodayOrders.length} {paidTodayOrders.length === 1 ? 'pedido pagado' : 'pedidos pagados'}</small>
           </article>
         </div>
       </header>

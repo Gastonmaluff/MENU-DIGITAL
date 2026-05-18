@@ -1760,7 +1760,7 @@ button { cursor: pointer; }
 }
 .cashier-summary {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 .cashier-summary article,
@@ -1782,7 +1782,13 @@ button { cursor: pointer; }
 }
 .cashier-summary strong {
   color: #b87934;
-  font-size: 1.35rem;
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+  line-height: 1;
+}
+.cashier-summary small {
+  color: #7a6658;
+  font-size: 0.78rem;
+  font-weight: 850;
 }
 .cashier-toolbar {
   padding: 12px;
@@ -3407,7 +3413,7 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .cashier-header {
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
+    grid-template-columns: minmax(0, 1fr) minmax(520px, 1.05fr);
     align-items: end;
   }
   .cashier-toolbar {

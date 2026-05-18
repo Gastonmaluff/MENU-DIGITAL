@@ -225,7 +225,7 @@ export const orderService = {
     orderService.update(id, {
       paymentStatus,
       paymentMethod,
-      ...(paymentStatus === 'pagado' ? { status: 'pagado' } : {}),
+      ...(paymentStatus === 'pagado' ? { status: 'pagado', paidAt: serverTimestamp() } : {}),
     }),
 
   cancel: (id) =>
