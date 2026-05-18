@@ -6,7 +6,6 @@ import BaristaOrders from './components/barista/BaristaOrders';
 import CashierPanel from './components/cashier/CashierPanel';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './components/admin/AdminDashboard';
-import AdminReports from './components/admin/AdminReports';
 import AdminLogin from './components/admin/AdminLogin';
 import CategoryList from './components/admin/CategoryList';
 import OrderList from './components/admin/OrderList';
@@ -63,7 +62,6 @@ function App() {
           >
             <Route index element={<AdminDashboard />} />
             <Route path="orders" element={<OrderList />} />
-            <Route path="reports" element={<AdminReports />} />
             <Route path="menu" element={<PublicViewEditor />} />
             <Route path="categories" element={<CategoryList />} />
             <Route path="products" element={<ProductList />} />
