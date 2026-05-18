@@ -1,12 +1,8 @@
-import {
-  BarChart3,
+﻿import {
   CalendarDays,
   CheckCircle2,
   ChevronDown,
   ClipboardList,
-  Package,
-  TrendingUp,
-  WalletCards,
   XCircle,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -236,68 +232,6 @@ const summarizeOrders = (orders) => {
   };
 };
 
-const getLastSevenDaySales = (orders) => {
-  const today = startOfDay(new Date());
-  const days = Array.from({ length: 7 }, (_, index) => {
-    const date = addDays(today, index - 6);
-    const dayLong = new Intl.DateTimeFormat('es-PY', { weekday: 'long' }).format(date);
-    const dayShort = new Intl.DateTimeFormat('es-PY', { weekday: 'short' }).format(date).replace('.', '');
-    return {
-      key: dateKey(date),
-      dayLabel: `${dayLong.charAt(0).toUpperCase()}${dayLong.slice(1)}`,
-      dayShortLabel: `${dayShort.charAt(0).toUpperCase()}${dayShort.slice(1)}`,
-      dateLabel: new Intl.DateTimeFormat('es-PY', { day: '2-digit', month: '2-digit' }).format(date),
-      value: 0,
-    };
-  });
-  const byKey = new Map(days.map((day) => [day.key, day]));
-
-  orders
-    .filter((order) => isPaid(order) && !isCancelled(order))
-    .forEach((order) => {
-      const date = toDate(order.createdAt);
-      const item = byKey.get(dateKey(date));
-      if (item) item.value += getOrderTotal(order);
-    });
-
-  return days;
-};
-
-const getProductRanking = (orders) => {
-  const totals = new Map();
-
-  orders
-    .filter((order) => !isCancelled(order))
-    .forEach((order) => {
-      (order.items || []).forEach((item) => {
-        const key = item.productId || item.name;
-        const current = totals.get(key) || { name: item.name || 'Producto', quantity: 0 };
-        current.quantity += getItemQuantity(item);
-        totals.set(key, current);
-      });
-    });
-
-  return [...totals.values()].sort((a, b) => b.quantity - a.quantity).slice(0, 5);
-};
-
-const getCategorySales = (orders) => {
-  const totals = new Map();
-
-  orders
-    .filter((order) => isPaid(order) && !isCancelled(order))
-    .forEach((order) => {
-      (order.items || []).forEach((item) => {
-        const category = item.category || 'Sin categoría';
-        totals.set(category, (totals.get(category) || 0) + Number(item.subtotal || 0));
-      });
-    });
-
-  return [...totals.entries()]
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 5);
-};
-
 export default function OrderList() {
   const { items: orders, syncing, error } = useOrders();
   const todayValue = toInputDate(new Date());
@@ -331,14 +265,6 @@ export default function OrderList() {
   );
   const rangeGroups = groupByDate(rangeOrders);
   const summary = summarizeOrders(weeklyOrders);
-  const salesByDay = getLastSevenDaySales(weeklyOrders);
-  const productRanking = getProductRanking(weeklyOrders);
-  const categorySales = getCategorySales(weeklyOrders);
-  const statusSummary = [
-    { label: 'Pagados', value: summary.paidCount, tone: 'paid' },
-    { label: 'Pendientes', value: summary.pendingCount, tone: 'pending' },
-    { label: 'Cancelados', value: summary.cancelledCount, tone: 'cancelled' },
-  ];
 
   const toggleGroup = (key, defaultOpen) => {
     setCollapsedGroups((current) => ({
@@ -510,45 +436,8 @@ export default function OrderList() {
         )}
       </section>
 
-      <section className="orders-commercial-cards" aria-label="Resumen comercial">
-        <MetricCard icon={WalletCards} label="Ventas pagadas" value={formatMoney(summary.paidSales)} detail="No incluye cancelados" />
-        <MetricCard icon={ClipboardList} label="Pedidos" value={summary.count} detail={`${summary.paidCount} pagados`} />
-        <MetricCard icon={TrendingUp} label="Ticket promedio" value={formatMoney(summary.averageTicket)} detail="Ventas / pagados" />
-        <MetricCard icon={XCircle} label="Cancelados" value={summary.cancelledCount} detail={formatMoney(summary.cancelledAmount)} />
-        <MetricCard
-          icon={Package}
-          label="Producto más vendido"
-          value={summary.topProduct?.name || 'Sin datos'}
-          detail={summary.topProduct ? `${summary.topProduct.quantity} unidades` : 'Sin ventas registradas'}
-        />
-        <MetricCard
-          icon={Package}
-          label="Producto menos vendido"
-          value={summary.bottomProduct?.name || 'Sin datos'}
-          detail={summary.bottomProduct ? `${summary.bottomProduct.quantity} unidades` : 'Sin ventas registradas'}
-        />
-      </section>
 
-      <section className="orders-chart-grid" aria-label="Gráficos comerciales">
-        <SalesBars title="Ventas por día" data={salesByDay} />
-        <StatusBars title="Pedidos por estado" data={statusSummary} />
-        <RankingBars title="Productos más vendidos" data={productRanking.map((item) => ({ label: item.name, value: item.quantity }))} />
-        <RankingBars title="Ventas por categoría" data={categorySales.map((item) => ({ label: item.name, value: item.value }))} money />
-      </section>
     </div>
-  );
-}
-
-function MetricCard({ icon: Icon, label, value, detail }) {
-  return (
-    <article className="orders-metric-card">
-      <span><Icon size={18} /></span>
-      <div>
-        <small>{label}</small>
-        <strong>{value}</strong>
-        <em>{detail}</em>
-      </div>
-    </article>
   );
 }
 
@@ -580,7 +469,7 @@ function OrderRecord({ order }) {
         {items.slice(0, 4).map((item, index) => (
           <span key={`${item.productId || item.name}-${index}`}>{item.quantity}x {item.name}</span>
         ))}
-        {items.length > 4 && <span>+{items.length - 4} productos más</span>}
+        {items.length > 4 && <span>+{items.length - 4} productos mas</span>}
       </div>
 
       {order.note && <p>Obs: {order.note}</p>}
@@ -604,7 +493,7 @@ function CancelledOrderRecord({ order }) {
         {items.slice(0, 4).map((item, index) => (
           <span key={`${item.productId || item.name}-${index}`}>{item.quantity}x {item.name}</span>
         ))}
-        {items.length > 4 && <span>+{items.length - 4} productos más</span>}
+        {items.length > 4 && <span>+{items.length - 4} productos mas</span>}
       </div>
       {order.cancelReason && <p>Motivo: {order.cancelReason}</p>}
     </article>
@@ -618,90 +507,5 @@ function Badge({ tone, children }) {
       <Icon size={14} />
       {children}
     </span>
-  );
-}
-
-function SalesBars({ title, data }) {
-  const max = Math.max(...data.map((item) => item.value), 1);
-
-  return (
-    <article className="orders-chart-card">
-      <ChartTitle title={title} />
-      <div className="orders-sales-bars">
-        {data.map((item) => (
-          <div className="orders-sales-bar" key={item.key}>
-            <div style={{ height: `${Math.max(6, (item.value / max) * 100)}%` }} />
-            <span className="orders-sales-label">
-              <strong className="orders-sales-day-full">{item.dayLabel}</strong>
-              <strong className="orders-sales-day-short">{item.dayShortLabel}</strong>
-              <small>{item.dateLabel}</small>
-            </span>
-          </div>
-        ))}
-      </div>
-    </article>
-  );
-}
-
-function StatusBars({ title, data }) {
-  const total = Math.max(data.reduce((sum, item) => sum + item.value, 0), 1);
-
-  return (
-    <article className="orders-chart-card">
-      <ChartTitle title={title} />
-      <div className="orders-horizontal-bars">
-        {data.map((item) => (
-          <ChartBar key={item.label} label={item.label} value={item.value} percent={(item.value / total) * 100} tone={item.tone} />
-        ))}
-      </div>
-    </article>
-  );
-}
-
-function RankingBars({ title, data, money = false }) {
-  const max = Math.max(...data.map((item) => item.value), 1);
-
-  return (
-    <article className="orders-chart-card">
-      <ChartTitle title={title} />
-      <div className="orders-horizontal-bars">
-        {data.length > 0 ? (
-          data.map((item) => (
-            <ChartBar
-              key={item.label}
-              label={item.label}
-              value={money ? formatMoney(item.value) : item.value}
-              percent={(item.value / max) * 100}
-              tone="neutral"
-            />
-          ))
-        ) : (
-          <div className="orders-muted-box">Sin datos suficientes.</div>
-        )}
-      </div>
-    </article>
-  );
-}
-
-function ChartTitle({ title }) {
-  return (
-    <header className="orders-chart-title">
-      <BarChart3 size={18} />
-      <strong>{title}</strong>
-    </header>
-  );
-}
-
-function ChartBar({ label, value, percent, tone }) {
-  return (
-    <div className={`orders-chart-row is-${tone}`}>
-      <div>
-        <span>{label}</span>
-        <b>{value}</b>
-      </div>
-      <em>
-        <i style={{ width: `${Math.max(4, percent)}%` }} />
-      </em>
-    </div>
   );
 }

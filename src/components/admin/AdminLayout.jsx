@@ -1,5 +1,6 @@
 import {
   Home,
+  LineChart,
   LogOut,
   Menu,
   ReceiptText,
@@ -16,6 +17,7 @@ import { resolveAssetUrl } from '../../utils/assets';
 const links = [
   { to: '/admin', label: 'Dashboard', icon: Home, end: true },
   { to: '/admin/orders', label: 'Pedidos', icon: ReceiptText },
+  { to: '/admin/reports', label: 'Informes', icon: LineChart },
   { to: '/admin/menu', label: 'Editar vista publica', icon: SquarePen },
   { to: '/admin/settings', label: 'Configuracion', icon: SlidersHorizontal },
 ];
